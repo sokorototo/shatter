@@ -1,4 +1,4 @@
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
 use alloc::{collections::BTreeMap, vec::Vec};
@@ -23,10 +23,10 @@ impl Node {
 				let half_extents = influence / 2;
 
 				bound.intersection(&BoundingBox {
-					top: self.x.saturating_sub(half_extents),
-					left: self.y.saturating_sub(half_extents),
-					bottom: self.x.saturating_add(half_extents),
-					right: self.y.saturating_add(half_extents),
+					left: self.x.saturating_sub(half_extents),
+					top: self.y.saturating_sub(half_extents),
+					right: self.x.saturating_add(half_extents),
+					bottom: self.y.saturating_add(half_extents),
 				})
 			}
 			None => Some(bound.clone()),
@@ -47,75 +47,114 @@ impl NoiseParams {
 
 	pub fn get_aabb(&self) -> BoundingBox {
 		BoundingBox {
-			top: 0,
 			left: 0,
-			bottom: self.width,
-			right: self.height,
+			top: 0,
+			right: self.width,
+			bottom: self.height,
 		}
 	}
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BoundingBox {
-	pub top: usize,
 	pub left: usize,
-	pub bottom: usize,
 	pub right: usize,
+	pub top: usize,
+	pub bottom: usize,
 }
 
 impl BoundingBox {
 	pub fn new(x: usize, y: usize, width: usize, height: usize) -> BoundingBox {
 		BoundingBox {
-			top: x,
-			left: y,
-			bottom: x + width,
-			right: y + height,
+			left: x,
+			right: x + width,
+			top: y,
+			bottom: y + height,
 		}
 	}
 
 	pub fn contains(&self, other: &BoundingBox) -> bool {
-		self.top <= other.top && self.left <= other.left && self.bottom >= other.bottom && self.right >= other.right
+		self.left <= other.left && self.top <= other.top && self.right >= other.right && self.bottom >= other.bottom
 	}
 
 	pub fn contains_point(&self, x: usize, y: usize) -> bool {
-		x >= self.top && x < self.bottom && y >= self.left && y < self.right
+		x >= self.left && x < self.right && y >= self.top && y < self.bottom
+	}
+
+	pub fn intersects(&self, other: &BoundingBox) -> bool {
+		let x_intersect = self.right > other.left && self.left < other.right;
+		let y_intersect = self.bottom > other.top && self.top < other.bottom;
+
+		x_intersect && y_intersect
 	}
 
 	pub fn intersection(&self, other: &BoundingBox) -> Option<BoundingBox> {
-		let x_intersect = self.bottom > other.top && other.bottom > self.top;
-		let y_intersect = self.right > other.left && other.right > self.left;
+		self.intersects(other).then(|| {
+			let x = self.left.max(other.left);
+			let y = self.top.max(other.top);
 
-		(x_intersect && y_intersect).then(|| {
-			let x = self.top.max(other.top);
-			let y = self.left.max(other.left);
-
-			let x2 = self.bottom.min(other.bottom);
-			let y2 = self.right.min(other.right);
+			let x2 = self.right.min(other.right);
+			let y2 = self.bottom.min(other.bottom);
 
 			BoundingBox {
-				top: x,
-				left: y,
-				bottom: x2,
-				right: y2,
+				left: x,
+				top: y,
+				right: x2,
+				bottom: y2,
 			}
 		})
 	}
 
 	// subtracts the other bounding box from this bounding box
-	pub fn subtract(&self, rhs: &BoundingBox) -> Vec<BoundingBox> {
-		let mut regions = Vec::new();
-
-		// if other aab fully contains this aab then there are no new regions
-		if rhs.contains(self) {
-			return regions;
+	pub fn subtract<F: FnOnce(&[BoundingBox])>(&self, rhs: &BoundingBox, callback: F) {
+		// if the 2 boxes don't intersect then there is no subtraction
+		if !self.intersects(rhs) {
+			return callback(&[]);
 		}
 
-		// top
+		let mut regions: [BoundingBox; 4] = unsafe { core::mem::MaybeUninit::zeroed().assume_init() };
+		let mut idx = 0;
 
-		regions
+		// chopping based algorithm
+		let mut base = self.clone();
+
+		// top
+		if base.top < rhs.top {
+			regions[idx] = BoundingBox { bottom: rhs.top, ..base };
+			base.top = rhs.top;
+
+			idx += 1;
+		}
+
+		// bottom
+		if base.bottom > rhs.bottom {
+			regions[idx] = BoundingBox { top: rhs.bottom, ..base };
+			base.bottom = rhs.bottom;
+
+			idx += 1;
+		}
+
+		// middle-left
+		if base.left < rhs.left {
+			regions[idx] = BoundingBox { right: rhs.left, ..base };
+			base.left = rhs.left;
+
+			idx += 1;
+		}
+
+		// middle-right
+		if base.right > rhs.right {
+			regions[idx] = BoundingBox { left: rhs.right, ..base };
+			base.right = rhs.right;
+
+			idx += 1;
+		}
+
+		callback(&regions[..idx]);
 	}
 
 	pub fn divide(&self, other: &BoundingBox) -> (Vec<BoundingBox>, Option<BoundingBox>, Vec<BoundingBox>) {
+		// check if the 2 intersect
 		unimplemented!("Given another bounding box return 3 sets of regions")
 	}
 }
@@ -168,7 +207,7 @@ fn get_regions<'a>(params: NoiseParams, nodes: &'a [Node]) -> BTreeMap<BoundingB
 			if let Some(influence) = node.get_aabb(region) {
 				let (divided, common, subtract) = influence.divide(region);
 
-				// is og volume doesn't intersect with new volume then there aren't any new volumes
+				// iF og volume doesn't intersect with new volume then there aren't any new volumes
 				if divided.is_empty() {
 					debug_assert!(common.is_none(), "Common region should be None if there are no divided regions");
 				}

@@ -30,6 +30,114 @@ fn bounding_box_contains() {
 }
 
 #[test]
+fn bounding_box_subtract() {
+	let base = BoundingBox::new(50, 50, 50, 50);
+
+	let side = BoundingBox::new(60, 60, 20, 20);
+	base.subtract(&side, |r| {
+		assert_eq!(
+			r,
+			&[
+				BoundingBox {
+					left: 50,
+					right: 100,
+					top: 50,
+					bottom: 60
+				},
+				BoundingBox {
+					left: 50,
+					right: 100,
+					top: 80,
+					bottom: 100
+				},
+				BoundingBox {
+					left: 50,
+					right: 60,
+					top: 60,
+					bottom: 80
+				},
+				BoundingBox {
+					left: 80,
+					right: 100,
+					top: 60,
+					bottom: 80
+				}
+			]
+		);
+	});
+
+	let no_intersect = BoundingBox::new(0, 0, 40, 40);
+	base.subtract(&no_intersect, |r| assert_eq!(r, &[]));
+
+	let corner = BoundingBox::new(75, 75, 25, 25);
+	base.subtract(&corner, |r| {
+		assert_eq!(
+			r,
+			&[
+				BoundingBox {
+					left: 50,
+					right: 100,
+					top: 50,
+					bottom: 75
+				},
+				BoundingBox {
+					left: 50,
+					right: 75,
+					top: 75,
+					bottom: 100
+				}
+			]
+		);
+	});
+
+	let contained = BoundingBox::new(60, 60, 20, 20);
+	base.subtract(&contained, |r| {
+		assert_eq!(
+			r,
+			&[
+				BoundingBox {
+					left: 50,
+					right: 100,
+					top: 50,
+					bottom: 60
+				},
+				BoundingBox {
+					left: 50,
+					right: 100,
+					top: 80,
+					bottom: 100
+				},
+				BoundingBox {
+					left: 50,
+					right: 60,
+					top: 60,
+					bottom: 80
+				},
+				BoundingBox {
+					left: 80,
+					right: 100,
+					top: 60,
+					bottom: 80
+				}
+			]
+		)
+	});
+
+	let perfectly_vertical = BoundingBox::new(50, 75, 50, 25);
+	base.subtract(&perfectly_vertical, |r| {
+		assert_eq!(
+			r,
+			&[BoundingBox {
+				left: 50,
+				right: 100,
+				top: 50,
+				bottom: 75
+			}]
+		)
+	});
+}
+
+#[test]
 fn get_node_aabb() {
 	let params = NoiseParams::new(200, 300);
 	let aabb = params.get_aabb();
