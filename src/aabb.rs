@@ -49,14 +49,14 @@ impl BoundingBox {
 	}
 
 	// subtracts the other bounding box from this bounding box
-	pub fn difference<F: FnOnce(&[BoundingBox])>(&self, rhs: &BoundingBox, callback: F) {
-		// if the 2 boxes don't intersect then there is no subtraction
-		if !self.intersects(rhs) {
-			return callback(&[]);
-		}
-
+	pub fn difference(&self, rhs: &BoundingBox) -> (usize, [BoundingBox; 4]) {
 		let mut regions: [BoundingBox; 4] = unsafe { core::mem::MaybeUninit::zeroed().assume_init() };
 		let mut idx = 0;
+
+		// if the 2 boxes don't intersect then there is no subtraction
+		if !self.intersects(rhs) {
+			return (0, regions);
+		}
 
 		// chopping based algorithm
 		let mut base = self.clone();
@@ -93,6 +93,6 @@ impl BoundingBox {
 			idx += 1;
 		}
 
-		callback(&regions[..idx]);
+		(idx, regions)
 	}
 }

@@ -1,4 +1,6 @@
 use super::*;
+use aabb::BoundingBox;
+use alloc::vec;
 
 #[test]
 fn bounding_box_intersection() {
@@ -26,7 +28,7 @@ fn bounding_box_contains() {
 	assert!(normal);
 	assert!(!no_contact);
 	assert!(!intersection);
-	assert!(base.contains(&base));
+	assert!(base.contains(&base)); // self contains self
 }
 
 #[test]
@@ -34,107 +36,103 @@ fn bounding_box_subtract() {
 	let base = BoundingBox::new(50, 50, 50, 50);
 
 	let side = BoundingBox::new(60, 60, 20, 20);
-	base.difference(&side, |r| {
-		assert_eq!(
-			r,
-			&[
-				BoundingBox {
-					left: 50,
-					right: 100,
-					top: 50,
-					bottom: 60
-				},
-				BoundingBox {
-					left: 50,
-					right: 100,
-					top: 80,
-					bottom: 100
-				},
-				BoundingBox {
-					left: 50,
-					right: 60,
-					top: 60,
-					bottom: 80
-				},
-				BoundingBox {
-					left: 80,
-					right: 100,
-					top: 60,
-					bottom: 80
-				}
-			]
-		);
-	});
+	let (count, res) = base.difference(&side);
+	assert_eq!(
+		&res[..count],
+		&[
+			BoundingBox {
+				left: 50,
+				right: 100,
+				top: 50,
+				bottom: 60
+			},
+			BoundingBox {
+				left: 50,
+				right: 100,
+				top: 80,
+				bottom: 100
+			},
+			BoundingBox {
+				left: 50,
+				right: 60,
+				top: 60,
+				bottom: 80
+			},
+			BoundingBox {
+				left: 80,
+				right: 100,
+				top: 60,
+				bottom: 80
+			}
+		]
+	);
 
 	let no_intersect = BoundingBox::new(0, 0, 40, 40);
-	base.difference(&no_intersect, |r| assert_eq!(r, &[]));
+	assert_eq!(base.difference(&no_intersect).0, 0);
 
 	let corner = BoundingBox::new(75, 75, 25, 25);
-	base.difference(&corner, |r| {
-		assert_eq!(
-			r,
-			&[
-				BoundingBox {
-					left: 50,
-					right: 100,
-					top: 50,
-					bottom: 75
-				},
-				BoundingBox {
-					left: 50,
-					right: 75,
-					top: 75,
-					bottom: 100
-				}
-			]
-		);
-	});
-
-	let contained = BoundingBox::new(60, 60, 20, 20);
-	base.difference(&contained, |r| {
-		assert_eq!(
-			r,
-			&[
-				BoundingBox {
-					left: 50,
-					right: 100,
-					top: 50,
-					bottom: 60
-				},
-				BoundingBox {
-					left: 50,
-					right: 100,
-					top: 80,
-					bottom: 100
-				},
-				BoundingBox {
-					left: 50,
-					right: 60,
-					top: 60,
-					bottom: 80
-				},
-				BoundingBox {
-					left: 80,
-					right: 100,
-					top: 60,
-					bottom: 80
-				}
-			]
-		)
-	});
-
-	let perfectly_vertical = BoundingBox::new(50, 75, 50, 25);
-	base.difference(&perfectly_vertical, |r| {
-		assert_eq!(
-			r,
-			&[BoundingBox {
+	let (count, res) = base.difference(&corner);
+	assert_eq!(
+		&res[..count],
+		&[
+			BoundingBox {
 				left: 50,
 				right: 100,
 				top: 50,
 				bottom: 75
-			}]
-		)
-	});
+			},
+			BoundingBox {
+				left: 50,
+				right: 75,
+				top: 75,
+				bottom: 100
+			}
+		]
+	);
+
+	let contained = BoundingBox::new(60, 60, 20, 20);
+	let (count, res) = base.difference(&contained);
+	assert_eq!(
+		&res[..count],
+		[
+			BoundingBox {
+				left: 50,
+				right: 100,
+				top: 50,
+				bottom: 60
+			},
+			BoundingBox {
+				left: 50,
+				right: 100,
+				top: 80,
+				bottom: 100
+			},
+			BoundingBox {
+				left: 50,
+				right: 60,
+				top: 60,
+				bottom: 80
+			},
+			BoundingBox {
+				left: 80,
+				right: 100,
+				top: 60,
+				bottom: 80
+			}
+		]
+	);
+
+	let perfectly_vertical = BoundingBox::new(50, 75, 50, 25);
+	let (count, res) = base.difference(&perfectly_vertical);
+	assert_eq!(
+		&res[..count],
+		&[BoundingBox {
+			left: 50,
+			right: 100,
+			top: 50,
+			bottom: 75
+		}]
+	);
 }
 
 #[test]
@@ -157,4 +155,30 @@ fn get_node_aabb() {
 	assert_eq!(outside.get_aabb(&aabb), Some(BoundingBox::new(185, 285, 15, 15)));
 	assert_eq!(far.get_aabb(&aabb), None);
 	assert_eq!(infinite.get_aabb(&aabb), Some(aabb));
+}
+
+#[test]
+fn test_get_regions() {
+	let params = NoiseParams::new(200, 300);
+	let nodes = [
+		Node::new(100, 150, Some(50)),
+		Node::new(0, 0, Some(50)),
+		Node::new(200, 300, Some(50)),
+		Node::new(210, 310, Some(50)),
+		Node::new(300, 400, Some(50)),
+		Node::new(5000, 5000, None),
+	];
+
+	let regions = get_regions(params, &nodes);
+
+	assert_eq!(
+		regions,
+		vec![
+			(BoundingBox::new(75, 125, 50, 50), vec![0]),
+			(BoundingBox::new(0, 0, 25, 25), vec![1]),
+			(BoundingBox::new(175, 275, 25, 25), vec![2]),
+			(BoundingBox::new(185, 285, 15, 15), vec![3]),
+			(BoundingBox::new(0, 0, 200, 300), vec![5]),
+		]
+	);
 }

@@ -12,6 +12,8 @@ impl<const T: usize, V> Stack<T, V> {
 	}
 
 	pub(crate) fn push(&mut self, value: V) {
+		assert!(self.top < T, "Stack Overflow: {} >= {}", self.top, T);
+
 		self.stack[self.top] = value;
 		self.top += 1;
 	}
@@ -25,6 +27,26 @@ impl<const T: usize, V> Stack<T, V> {
 		}
 	}
 
+	pub(crate) fn get(&self, index: usize) -> Option<&V> {
+		if index < self.top {
+			Some(&self.stack[index])
+		} else {
+			None
+		}
+	}
+
+	pub(crate) fn get_mut(&mut self, index: usize) -> Option<&mut V> {
+		if index < self.top {
+			Some(&mut self.stack[index])
+		} else {
+			None
+		}
+	}
+
+	pub(crate) fn as_mut_slice(&mut self) -> &mut [V] {
+		&mut self.stack[..self.top]
+	}
+
 	pub(crate) fn len(&self) -> usize {
 		self.top
 	}
@@ -34,5 +56,24 @@ impl<const T: usize, V> Stack<T, V> {
 		self.top -= 1;
 		self.stack.swap(index, self.top);
 		value
+	}
+}
+
+pub(crate) struct StackIntoIter<const T: usize, V>(Stack<T, V>);
+
+impl<const T: usize, V> Iterator for StackIntoIter<T, V> {
+	type Item = V;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		self.0.pop()
+	}
+}
+
+impl<const T: usize, V> IntoIterator for Stack<T, V> {
+	type Item = V;
+	type IntoIter = StackIntoIter<T, V>;
+
+	fn into_iter(self) -> Self::IntoIter {
+		StackIntoIter(self)
 	}
 }
