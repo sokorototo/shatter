@@ -1,7 +1,25 @@
 [package]
-name = "worley-rs"
+name = "shatter"
+license = "Mozilla Public License 2.0"
+authors = ["Newton Toto <nyachiengatoto@gmail.com>"]
+description = "An algorithm for dividing a 2D space amond a labelled set of Axis-Aligned Bounding Boxes"
+categories = [
+	"algorithms",
+	"geometry",
+	"data-structures",
+	"no-std",
+	"mathematics",
+]
 version = "0.1.0"
 edition = "2021"
 
 [features]
 std = []
+
+[[example]]
+name = "demo"
+path = "demo/main.rs"
+required-features = ["std"]
+
+[dev-dependencies]
+minifb = "0.27"
