@@ -34,7 +34,7 @@ fn bounding_box_subtract() {
 	let base = BoundingBox::new(50, 50, 50, 50);
 
 	let side = BoundingBox::new(60, 60, 20, 20);
-	base.subtract(&side, |r| {
+	base.difference(&side, |r| {
 		assert_eq!(
 			r,
 			&[
@@ -67,10 +67,10 @@ fn bounding_box_subtract() {
 	});
 
 	let no_intersect = BoundingBox::new(0, 0, 40, 40);
-	base.subtract(&no_intersect, |r| assert_eq!(r, &[]));
+	base.difference(&no_intersect, |r| assert_eq!(r, &[]));
 
 	let corner = BoundingBox::new(75, 75, 25, 25);
-	base.subtract(&corner, |r| {
+	base.difference(&corner, |r| {
 		assert_eq!(
 			r,
 			&[
@@ -91,7 +91,7 @@ fn bounding_box_subtract() {
 	});
 
 	let contained = BoundingBox::new(60, 60, 20, 20);
-	base.subtract(&contained, |r| {
+	base.difference(&contained, |r| {
 		assert_eq!(
 			r,
 			&[
@@ -124,7 +124,7 @@ fn bounding_box_subtract() {
 	});
 
 	let perfectly_vertical = BoundingBox::new(50, 75, 50, 25);
-	base.subtract(&perfectly_vertical, |r| {
+	base.difference(&perfectly_vertical, |r| {
 		assert_eq!(
 			r,
 			&[BoundingBox {
