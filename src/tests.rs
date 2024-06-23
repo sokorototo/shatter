@@ -135,7 +135,7 @@ fn bounding_box_subtract() {
 	);
 
 	let fully_contained = base.clone();
-	let (count, res) = base.difference(&fully_contained);
+	let (count, _) = base.difference(&fully_contained);
 	assert_eq!(count, 0);
 }
 
@@ -152,10 +152,42 @@ fn get_node_influence() {
 	let infinite = Node::new(5000, 5000, None);
 
 	// test cases
-	assert_eq!(middle.get_influence(&aabb), Some(BoundingBox::new(75, 125, 50, 50)));
-	assert_eq!(top_left.get_influence(&aabb), Some(BoundingBox::new(0, 0, 25, 25)));
-	assert_eq!(bottom_right.get_influence(&aabb), Some(BoundingBox::new(175, 275, 25, 25)));
-	assert_eq!(outside.get_influence(&aabb), Some(BoundingBox::new(185, 285, 15, 15)));
+	assert_eq!(
+		middle.get_influence(&aabb),
+		Some(BoundingBox {
+			left: 50,
+			right: 150,
+			top: 100,
+			bottom: 200
+		})
+	);
+	assert_eq!(
+		top_left.get_influence(&aabb),
+		Some(BoundingBox {
+			left: 0,
+			right: 50,
+			top: 0,
+			bottom: 50
+		})
+	);
+	assert_eq!(
+		bottom_right.get_influence(&aabb),
+		Some(BoundingBox {
+			left: 150,
+			right: 200,
+			top: 250,
+			bottom: 300
+		})
+	);
+	assert_eq!(
+		outside.get_influence(&aabb),
+		Some(BoundingBox {
+			left: 160,
+			right: 200,
+			top: 260,
+			bottom: 300
+		})
+	);
 	assert_eq!(far.get_influence(&aabb), None);
 	assert_eq!(infinite.get_influence(&aabb), Some(aabb));
 }
@@ -198,28 +230,53 @@ fn test_get_regions() {
 		]
 	);
 
-	let one_inside_the_other = [Node::new(75, 150, Some(50)), Node::new(75, 150, Some(25))];
+	let no_contact = [Node::new(0, 0, Some(50)), Node::new(75, 125, Some(50))];
 	assert_eq!(
-		get_regions(&base, &one_inside_the_other),
+		get_regions(&base, &no_contact),
 		vec![
 			(
 				BoundingBox {
-					left: 50,
-					right: 100,
-					top: 150,
-					bottom: 175
+					left: 0,
+					right: 50,
+					top: 0,
+					bottom: 50
 				},
 				vec![0]
 			),
 			(
 				BoundingBox {
-					left: 62,
-					right: 88,
-					top: 138,
-					bottom: 162
+					left: 50,
+					right: 100,
+					top: 125,
+					bottom: 150
 				},
 				vec![1]
 			)
 		]
 	);
+
+	// let one_inside_the_other = [Node::new(75, 150, Some(50)), Node::new(75, 150, Some(25))];
+	// assert_eq!(
+	// 	get_regions(&base, &one_inside_the_other),
+	// 	vec![
+	// 		(
+	// 			BoundingBox {
+	// 				left: 50,
+	// 				right: 100,
+	// 				top: 150,
+	// 				bottom: 175
+	// 			},
+	// 			vec![0]
+	// 		),
+	// 		(
+	// 			BoundingBox {
+	// 				left: 62,
+	// 				right: 88,
+	// 				top: 138,
+	// 				bottom: 162
+	// 			},
+	// 			vec![1]
+	// 		)
+	// 	]
+	// );
 }

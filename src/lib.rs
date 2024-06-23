@@ -14,27 +14,23 @@ mod tests;
 pub struct Node {
 	pub x: isize,
 	pub y: isize,
-	pub influence: Option<isize>,
+	pub half_extent: Option<isize>,
 }
 
 impl Node {
-	pub fn new(x: isize, y: isize, influence: Option<isize>) -> Node {
-		Node { x, y, influence }
+	pub fn new(x: isize, y: isize, half_extent: Option<isize>) -> Node {
+		Node { x, y, half_extent }
 	}
 
 	// creates a Bounding box based on the node's influence
 	pub fn get_influence(&self, bound: &aabb::BoundingBox) -> Option<aabb::BoundingBox> {
-		match self.influence {
-			Some(influence) => {
-				let half_extents = influence / 2;
-
-				bound.intersection(&aabb::BoundingBox {
-					left: self.x.saturating_sub(half_extents),
-					top: self.y.saturating_sub(half_extents),
-					right: self.x.saturating_add(half_extents),
-					bottom: self.y.saturating_add(half_extents),
-				})
-			}
+		match self.half_extent {
+			Some(half_extent) => bound.intersection(&aabb::BoundingBox {
+				left: self.x.saturating_sub(half_extent),
+				top: self.y.saturating_sub(half_extent),
+				right: self.x.saturating_add(half_extent),
+				bottom: self.y.saturating_add(half_extent),
+			}),
 			None => Some(bound.clone()),
 		}
 	}
@@ -119,11 +115,12 @@ pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::Boun
 						break 'shrink;
 					}
 				}
-			}
 
-			#[cfg(feature = "std")]
-			{
-				println!("[STACK]\n{:#?}\n", stack);
+				#[cfg(feature = "std")]
+				{
+					println!("[STACK]\n{:#?}\n", stack);
+					println!("[INDEX]\n{:#?}\n", index);
+				}
 			}
 
 			// push all remaining regions in the stack to the index
