@@ -1,13 +1,13 @@
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BoundingBox {
-	pub left: usize,
-	pub right: usize,
-	pub top: usize,
-	pub bottom: usize,
+	pub left: isize,
+	pub right: isize,
+	pub top: isize,
+	pub bottom: isize,
 }
 
 impl BoundingBox {
-	pub fn new(x: usize, y: usize, width: usize, height: usize) -> BoundingBox {
+	pub fn new(x: isize, y: isize, width: isize, height: isize) -> BoundingBox {
 		BoundingBox {
 			left: x,
 			right: x + width,
@@ -16,11 +16,15 @@ impl BoundingBox {
 		}
 	}
 
+	pub fn area(&self) -> isize {
+		(self.right - self.left) * (self.bottom - self.top)
+	}
+
 	pub fn contains(&self, other: &BoundingBox) -> bool {
 		self.left <= other.left && self.top <= other.top && self.right >= other.right && self.bottom >= other.bottom
 	}
 
-	pub fn contains_point(&self, x: usize, y: usize) -> bool {
+	pub fn contains_point(&self, x: isize, y: isize) -> bool {
 		x >= self.left && x < self.right && y >= self.top && y < self.bottom
 	}
 

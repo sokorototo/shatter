@@ -1,6 +1,13 @@
+#[derive(Clone)]
 pub(crate) struct Stack<const T: usize, V> {
 	stack: [V; T],
 	top: usize,
+}
+
+impl<const T: usize, V: core::fmt::Debug> core::fmt::Debug for Stack<T, V> {
+	fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+		self.as_slice().fmt(f)
+	}
 }
 
 impl<const T: usize, V> Stack<T, V> {
@@ -35,16 +42,8 @@ impl<const T: usize, V> Stack<T, V> {
 		}
 	}
 
-	pub(crate) fn get_mut(&mut self, index: usize) -> Option<&mut V> {
-		if index < self.top {
-			Some(&mut self.stack[index])
-		} else {
-			None
-		}
-	}
-
-	pub(crate) fn as_mut_slice(&mut self) -> &mut [V] {
-		&mut self.stack[..self.top]
+	pub(crate) fn as_slice(&self) -> &[V] {
+		&self.stack[..self.top]
 	}
 
 	pub(crate) fn len(&self) -> usize {
