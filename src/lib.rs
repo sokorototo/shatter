@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
-use aabb::BoundingBox;
+pub use aabb::BoundingBox;
 use alloc::vec::Vec;
 
 mod aabb;
@@ -37,9 +37,9 @@ impl Node {
 }
 
 pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::BoundingBox, Vec<usize>)> {
-	let mut index: Vec<(aabb::BoundingBox, Vec<usize>)> = Vec::new();
+	let mut arena: Vec<(aabb::BoundingBox, Vec<usize>)> = Vec::new();
 
-	// Add each node's influence to the index: Subdivide, Modify|Shrink, Merge
+	// Add each node's influence to the arena: Subdivide, Modify|Shrink, Merge
 	for (node_idx, node) in nodes.into_iter().enumerate() {
 		// does the node have influence on the root region?
 		if let Some(influence) = node.get_influence(&root) {
@@ -63,11 +63,11 @@ pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::Boun
 					println!("[STACK]\n{:?}\n", stack);
 				}
 
-				// find the first intersection between the pending regions and the index
+				// find first intersection with regions in stack and regions in the arena
 				let mut needle = None;
 
 				'search: for (stack_idx, pending) in stack.as_slice().into_iter().enumerate() {
-					for (idx, (region, _)) in index.iter().enumerate() {
+					for (idx, (region, _)) in arena.iter().enumerate() {
 						if let Some(intersection) = region.intersection(pending) {
 							needle = Some((intersection, idx, stack_idx));
 							break 'search;
@@ -78,7 +78,7 @@ pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::Boun
 				#[cfg(feature = "std")]
 				{
 					if let Some((intersection, region_idx, pending_idx)) = needle.as_ref() {
-						let item = index.get(*region_idx).unwrap();
+						let item = arena.get(*region_idx).unwrap();
 						let pending = stack.get(*pending_idx).unwrap();
 
 						println!(
@@ -99,46 +99,46 @@ pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::Boun
 						}
 
 						// create new region adding this node's influence
-						let (_, influence) = index.get(region_idx).expect("Index doesn't contain specified item");
+						let (_, influence) = arena.get(region_idx).expect("Arena doesn't contain specified item");
 
 						let mut new_influence = influence.clone();
 						new_influence.push(node_idx);
-						index.push((intersection.clone(), new_influence));
+						arena.push((intersection.clone(), new_influence));
 
-						// add (region - intersection) to the index, remove old region
-						let (region, influence) = index.get(region_idx).expect("Index doesn't contain specified item").clone();
+						// add (region - intersection) to the arena, remove old region
+						let (region, influence) = arena.get(region_idx).expect("Arena doesn't contain specified item").clone();
 
 						let (count, descendants) = region.difference(&intersection);
 						for new_region in &descendants[..count] {
-							index.push((new_region.clone(), influence.clone()));
+							arena.push((new_region.clone(), influence.clone()));
 						}
 
-						// remove old regions from the index and stack
+						// remove old regions from the arena and stack
 						stack.swap_remove(pending_idx);
-						index.swap_remove(region_idx);
+						arena.swap_remove(region_idx);
 					}
 					None => {
-						// None of the pending regions intersect with any of the regions in the index
+						// None of the pending regions intersect with any of the regions in the arena
 						break 'shrink;
 					}
 				}
 
 				#[cfg(feature = "std")]
 				{
-					println!("[INDEX]\n{:?}\n", index);
+					println!("[ARENA]\n{:?}\n", arena);
 				}
 			}
 
-			// push all remaining regions in the stack to the index
+			// push all remaining regions in the stack to the arena
 			if stack.len() > 0 {
 				let list = alloc::vec![node_idx]; // replace with Cow::Borrowed(&[idx]) if possible
 
 				stack.into_iter().for_each(|region| {
-					index.push((region, list.clone()));
+					arena.push((region, list.clone()));
 				});
 			}
 		}
 	}
 
-	index
+	arena
 }
