@@ -202,28 +202,28 @@ fn test_get_regions() {
 		vec![
 			(
 				BoundingBox {
-					left: 50,
-					right: 100,
-					top: 150,
-					bottom: 175
+					left: 25,
+					right: 125,
+					top: 175,
+					bottom: 200
 				},
 				vec![0]
 			),
 			(
 				BoundingBox {
-					left: 50,
-					right: 100,
-					top: 125,
-					bottom: 150
+					left: 25,
+					right: 125,
+					top: 100,
+					bottom: 175
 				},
 				vec![0, 1]
 			),
 			(
 				BoundingBox {
-					left: 50,
-					right: 100,
-					top: 100,
-					bottom: 125
+					left: 25,
+					right: 125,
+					top: 75,
+					bottom: 100
 				},
 				vec![1]
 			)
@@ -245,38 +245,65 @@ fn test_get_regions() {
 			),
 			(
 				BoundingBox {
-					left: 50,
-					right: 100,
-					top: 125,
-					bottom: 150
+					left: 25,
+					right: 125,
+					top: 75,
+					bottom: 175
 				},
 				vec![1]
 			)
 		]
 	);
 
-	// let one_inside_the_other = [Node::new(75, 150, Some(50)), Node::new(75, 150, Some(25))];
-	// assert_eq!(
-	// 	get_regions(&base, &one_inside_the_other),
-	// 	vec![
-	// 		(
-	// 			BoundingBox {
-	// 				left: 50,
-	// 				right: 100,
-	// 				top: 150,
-	// 				bottom: 175
-	// 			},
-	// 			vec![0]
-	// 		),
-	// 		(
-	// 			BoundingBox {
-	// 				left: 62,
-	// 				right: 88,
-	// 				top: 138,
-	// 				bottom: 162
-	// 			},
-	// 			vec![1]
-	// 		)
-	// 	]
-	// );
+	let one_inside_the_other = [Node::new(75, 150, Some(50)), Node::new(75, 150, Some(25))];
+	assert_eq!(
+		get_regions(&base, &one_inside_the_other),
+		vec![
+			(
+				BoundingBox {
+					left: 100,
+					right: 125,
+					top: 125,
+					bottom: 175
+				},
+				vec![0]
+			),
+			(
+				BoundingBox {
+					left: 50,
+					right: 100,
+					top: 125,
+					bottom: 175
+				},
+				vec![0, 1]
+			),
+			(
+				BoundingBox {
+					left: 25,
+					right: 125,
+					top: 100,
+					bottom: 125
+				},
+				vec![0]
+			),
+			(
+				BoundingBox {
+					left: 25,
+					right: 125,
+					top: 175,
+					bottom: 200
+				},
+				vec![0]
+			),
+			(
+				BoundingBox {
+					left: 25,
+					right: 50,
+					top: 125,
+					bottom: 175
+				},
+				vec![0]
+			)
+		]
+	);
 }

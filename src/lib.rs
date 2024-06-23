@@ -53,6 +53,17 @@ pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::Boun
 			stack.push(influence);
 
 			'shrink: loop {
+				// if stack is empty, we're done
+				if stack.len() == 0 {
+					break 'shrink;
+				}
+
+				#[cfg(feature = "std")]
+				{
+					println!("[STACK]\n{:?}\n", stack);
+				}
+
+				// find the first intersection between the pending regions and the index
 				let mut needle = None;
 
 				'search: for (stack_idx, pending) in stack.as_slice().into_iter().enumerate() {
@@ -82,8 +93,8 @@ pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::Boun
 				match needle {
 					Some((intersection, region_idx, pending_idx)) => {
 						// add (pending - intersection) to the pending stack
-						let (pending_count, found) = stack.get(pending_idx).expect("Item not found in stack?").difference(&intersection);
-						for new_pending in &found[..pending_count] {
+						let (count, descendants) = stack.get(pending_idx).expect("Item not found in stack?").difference(&intersection);
+						for new_pending in &descendants[..count] {
 							stack.push(new_pending.clone());
 						}
 
@@ -97,18 +108,14 @@ pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::Boun
 						// add (region - intersection) to the index, remove old region
 						let (region, influence) = index.get(region_idx).expect("Index doesn't contain specified item").clone();
 
-						let (region_count, descendants) = region.difference(&intersection);
-						for new_region in &descendants[..region_count] {
+						let (count, descendants) = region.difference(&intersection);
+						for new_region in &descendants[..count] {
 							index.push((new_region.clone(), influence.clone()));
 						}
 
-						// remove old regions from the index and stack, if any new regions were added
-						if pending_count > 0 {
-							stack.swap_remove(pending_idx);
-						}
-						if region_count > 0 {
-							index.swap_remove(region_idx);
-						}
+						// remove old regions from the index and stack
+						stack.swap_remove(pending_idx);
+						index.swap_remove(region_idx);
 					}
 					None => {
 						// None of the pending regions intersect with any of the regions in the index
@@ -118,8 +125,7 @@ pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::Boun
 
 				#[cfg(feature = "std")]
 				{
-					println!("[STACK]\n{:#?}\n", stack);
-					println!("[INDEX]\n{:#?}\n", index);
+					println!("[INDEX]\n{:?}\n", index);
 				}
 			}
 
