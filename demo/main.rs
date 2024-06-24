@@ -5,6 +5,7 @@ use shatter::*;
 
 const WIDTH: usize = 600;
 const HEIGHT: usize = 600;
+const TEXT_PADDING: usize = 3;
 
 fn main() {
 	let mut buffer = vec![0xFFF0F0F0; WIDTH * HEIGHT];
@@ -17,22 +18,24 @@ fn main() {
 	let mut window = Window::new("ESC to exit, Up/Down incr or decr influence, Left/Right adds/removes Nodes", WIDTH, HEIGHT, options).unwrap();
 	window.set_target_fps(30);
 
+	let font = minifb_fonts::font6x8::new_renderer(WIDTH, HEIGHT, 0xFF000000);
+
 	// Get arena
 	let base = BoundingBox::new(0, 0, WIDTH as _, HEIGHT as _);
 	let mut nodes = [
-		Node::square(200, 200, Some(100)),
-		Node::square(0, 0, Some(200)),
-		Node::square(75, 150, Some(25)),
+		Node::new(0, 0, Some((550, 210))),
+		Node::new(75, 150, Some((25, 30))),
 		Node::square(400, 400, Some(100)),
-		Node::square(410, 350, Some(100)),
+		Node::new(410, 350, Some((100, 70))),
 		Node::square(150, 150, Some(300)),
 		Node::square(350, 400, Some(75)),
-		Node::square(450, 200, Some(100)),
-		Node::square(150, 250, Some(60)),
+		Node::new(450, 200, Some((100, 75))),
+		Node::new(150, 250, Some((60, 250))),
+		Node::new(400, 300, Some((100, 250))),
 	];
 
 	// sorting the nodes in descending order of their influence, massive performance boost
-	nodes.sort_by(|a, b| b.half_extents.cmp(&a.half_extents));
+	nodes.sort_by(|a, b| (b.half_extents.as_ref().map(|(x, y)| x * y).unwrap_or(0)).cmp(&a.half_extents.as_ref().map(|(x, y)| x * y).unwrap_or(0)));
 
 	// Get regions
 	let mut regions = get_regions(&base, &nodes);
@@ -81,20 +84,30 @@ fn main() {
 			let width = (region.right - region.left) as usize;
 			let offset = region.left as usize;
 
+			// draw influence
 			let mut hasher = DefaultHasher::new();
 			influence.hash(&mut hasher);
 			let hash = hasher.finish() as u32;
 
 			for y in region.top..region.bottom {
 				let y = y as usize;
-				let slice = &mut buffer[(y * WIDTH + offset)..(y * WIDTH + offset + width)];
+				let slice = buffer.get_mut((y * WIDTH + offset)..(y * WIDTH + offset + width)).unwrap();
 				slice.fill(hash);
 			}
 
-			let top_line = &mut buffer[(region.top as usize * WIDTH + offset)..(region.top as usize * WIDTH + offset + width)];
+			// draw text
+			let text = format!("{:?}", influence);
+			font.draw_text(&mut buffer, region.left as usize + TEXT_PADDING, region.top as usize + TEXT_PADDING, &text);
+
+			// draw border
+			let top_line = buffer
+				.get_mut((region.top as usize * WIDTH + offset)..(region.top as usize * WIDTH + offset + width))
+				.unwrap();
 			top_line.fill(0xFF000000);
 
-			let bottom_line = &mut buffer[(region.bottom as usize * WIDTH + offset)..(region.bottom as usize * WIDTH + offset + width)];
+			let bottom_line = buffer
+				.get_mut((region.bottom as usize * WIDTH + offset)..(region.bottom as usize * WIDTH + offset + width))
+				.unwrap();
 			bottom_line.fill(0xFF000000);
 
 			for y in region.top..region.bottom {
