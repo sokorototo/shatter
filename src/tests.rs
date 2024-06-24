@@ -144,12 +144,12 @@ fn get_node_influence() {
 	let aabb = BoundingBox::new(0, 0, 200, 300);
 
 	// define cases
-	let middle = Node::new(100, 150, Some(50));
-	let top_left = Node::new(0, 0, Some(50));
-	let bottom_right = Node::new(200, 300, Some(50));
-	let outside = Node::new(210, 310, Some(50));
-	let far = Node::new(300, 400, Some(50));
-	let infinite = Node::new(5000, 5000, None);
+	let middle = Node::square(100, 150, Some(50));
+	let top_left = Node::square(0, 0, Some(50));
+	let bottom_right = Node::square(200, 300, Some(50));
+	let outside = Node::square(210, 310, Some(50));
+	let far = Node::square(300, 400, Some(50));
+	let infinite = Node::square(5000, 5000, None);
 
 	// test cases
 	assert_eq!(
@@ -196,7 +196,7 @@ fn get_node_influence() {
 fn test_get_regions() {
 	let base = BoundingBox::new(0, 0, 200, 300);
 
-	let one_above_the_other = [Node::new(75, 150, Some(50)), Node::new(75, 125, Some(50))];
+	let one_above_the_other = [Node::square(75, 150, Some(50)), Node::square(75, 125, Some(50))];
 	assert_eq!(
 		get_regions(&base, &one_above_the_other),
 		vec![
@@ -230,7 +230,7 @@ fn test_get_regions() {
 		]
 	);
 
-	let no_contact = [Node::new(0, 0, Some(50)), Node::new(75, 125, Some(50))];
+	let no_contact = [Node::square(0, 0, Some(50)), Node::square(75, 125, Some(50))];
 	assert_eq!(
 		get_regions(&base, &no_contact),
 		vec![
@@ -255,7 +255,7 @@ fn test_get_regions() {
 		]
 	);
 
-	let one_inside_the_other = [Node::new(75, 150, Some(50)), Node::new(75, 150, Some(25))];
+	let one_inside_the_other = [Node::square(75, 150, Some(50)), Node::square(75, 150, Some(25))];
 	assert_eq!(
 		get_regions(&base, &one_inside_the_other),
 		vec![
