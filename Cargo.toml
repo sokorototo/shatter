@@ -17,8 +17,13 @@ edition = "2021"
 std = []
 
 [[example]]
-name = "demo"
-path = "demo/main.rs"
+name = "partitioning"
+path = "demos/partitioning.rs"
+required-features = ["std"]
+
+[[example]]
+name = "noise"
+path = "demos/noise.rs"
 required-features = ["std"]
 
 [dev-dependencies]
