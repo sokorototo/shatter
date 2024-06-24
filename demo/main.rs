@@ -39,6 +39,7 @@ fn main() {
 
 	// Get regions
 	let mut regions = get_regions(&base, &nodes);
+	let mut max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
 
 	let then = std::time::Instant::now();
 	for _ in 0..1000 {
@@ -55,7 +56,7 @@ fn main() {
 	while window.is_open() && !window.is_key_down(Key::Escape) {
 		// controls
 		if window.is_key_released(Key::Up) {
-			shown_influence = shown_influence.saturating_add(1);
+			shown_influence = shown_influence.saturating_add(1).min(max_influence);
 		}
 
 		if window.is_key_released(Key::Down) {
@@ -65,11 +66,13 @@ fn main() {
 		if window.is_key_released(Key::Right) {
 			rendered_regions = rendered_regions.saturating_add(1).min(nodes.len());
 			regions = get_regions(&base, &nodes[..rendered_regions]);
+			max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
 		}
 
 		if window.is_key_released(Key::Left) {
 			rendered_regions = rendered_regions.saturating_sub(1);
 			regions = get_regions(&base, &nodes[..rendered_regions]);
+			max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
 		}
 
 		// clear screen
