@@ -73,6 +73,7 @@ fn main() {
 			rendered_regions = rendered_regions.saturating_sub(1);
 			regions = get_regions(&base, &nodes[..rendered_regions]);
 			max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
+			shown_influence = shown_influence.min(max_influence);
 		}
 
 		// clear screen
