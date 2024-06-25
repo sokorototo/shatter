@@ -41,24 +41,24 @@ impl Node {
 }
 
 /// Sorting `nodes` in descending order of Area of Influence massively reduces fragmentation and improves performance significantly
-pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::BoundingBox, Rc<Vec<usize>>)> {
+pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(aabb::BoundingBox, Rc<Vec<usize>>)> {
 	// TODO: Replace Rc<Vec<usize>> with RcStack<32, usize>
 	let mut partitions: Vec<(aabb::BoundingBox, Rc<Vec<usize>>)> = Vec::new();
+	let mut pending = Vec::with_capacity(8);
 
 	// Add each node's influence to the arena: Subdivide, Modify|Shrink, Merge
-	for (node_idx, node) in nodes.into_iter().enumerate() {
+	for (node_idx, node) in nodes.iter().enumerate() {
 		// does the node have influence on the root region?
-		if let Some(influence) = node.get_influence(&root) {
+		if let Some(influence) = node.get_influence(root) {
 			// store pending partition
-			let mut pending = Vec::with_capacity(8);
 			pending.push(influence);
 
 			// attempt to dissolve pending regions
-			while pending.len() != 0 {
+			while !pending.is_empty() {
 				// find first intersection with partitions in stack and partitions in the arena
 				let mut needle = None;
 
-				'search: for (stack_idx, p) in pending.as_slice().into_iter().enumerate() {
+				'search: for (stack_idx, p) in pending.as_slice().iter().enumerate() {
 					for (idx, (partition, _)) in partitions.iter().enumerate() {
 						if let Some(intersection) = partition.intersection(p) {
 							needle = Some((intersection, idx, stack_idx));
@@ -78,7 +78,7 @@ pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::Boun
 						// create new partition adding this node's influence
 						let (_, influence) = partitions.get(partition_idx).expect("Arena doesn't contain specified item");
 
-						let mut new_influence = Vec::clone(&influence);
+						let mut new_influence = Vec::clone(influence);
 						new_influence.push(node_idx);
 						partitions.push((intersection.clone(), Rc::new(new_influence)));
 
@@ -98,7 +98,7 @@ pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::Boun
 					None => {
 						// None of the pending regions intersect with any of the partition in the arena
 						let list = Rc::new(alloc::vec![node_idx]);
-						partitions.extend(pending.into_iter().map(|p| (p, list.clone())));
+						partitions.extend(pending.drain(..).map(|p| (p, list.clone())));
 
 						break;
 					}
