@@ -1,16 +1,16 @@
 #[derive(Clone)]
-pub(crate) struct Stack<const T: usize, V> {
+pub struct Stack<V, const T: usize = 32> {
 	stack: [V; T],
 	top: usize,
 }
 
-impl<const T: usize, V: core::fmt::Debug> core::fmt::Debug for Stack<T, V> {
+impl<V: core::fmt::Debug, const T: usize> core::fmt::Debug for Stack<V, T> {
 	fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
 		self.as_slice().fmt(f)
 	}
 }
 
-impl<const T: usize, V> Stack<T, V> {
+impl<V, const T: usize> Stack<V, T> {
 	pub(crate) fn new() -> Self {
 		Self {
 			stack: unsafe { core::mem::MaybeUninit::zeroed().assume_init() },
@@ -42,7 +42,7 @@ impl<const T: usize, V> Stack<T, V> {
 		}
 	}
 
-	pub(crate) fn as_slice(&self) -> &[V] {
+	pub fn as_slice(&self) -> &[V] {
 		&self.stack[..self.top]
 	}
 
@@ -58,9 +58,9 @@ impl<const T: usize, V> Stack<T, V> {
 	}
 }
 
-pub(crate) struct StackIntoIter<const T: usize, V>(Stack<T, V>);
+pub struct StackIntoIter<V, const T: usize>(Stack<V, T>);
 
-impl<const T: usize, V> Iterator for StackIntoIter<T, V> {
+impl<V, const T: usize> Iterator for StackIntoIter<V, T> {
 	type Item = V;
 
 	fn next(&mut self) -> Option<Self::Item> {
@@ -68,11 +68,13 @@ impl<const T: usize, V> Iterator for StackIntoIter<T, V> {
 	}
 }
 
-impl<const T: usize, V> IntoIterator for Stack<T, V> {
+impl<V, const T: usize> IntoIterator for Stack<V, T> {
 	type Item = V;
-	type IntoIter = StackIntoIter<T, V>;
+	type IntoIter = StackIntoIter<V, T>;
 
 	fn into_iter(self) -> Self::IntoIter {
 		StackIntoIter(self)
 	}
 }
+
+// TODO: stack! macro

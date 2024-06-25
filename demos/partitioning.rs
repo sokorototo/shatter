@@ -34,16 +34,16 @@ fn main() {
 		Node::new(400, 300, Some((100, 250))),
 	];
 
-	// sorting the nodes in descending order of their influence, massive performance boost
+	// sort to reduce fragmentation
 	nodes.sort_by(|a, b| (b.half_extents.as_ref().map(|(x, y)| x * y).unwrap_or(0)).cmp(&a.half_extents.as_ref().map(|(x, y)| x * y).unwrap_or(0)));
 
 	// Get regions
-	let mut regions = get_regions(&base, &nodes);
-	let mut max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
+	let mut regions = get_regions::<8>(&base, &nodes);
+	let mut max_influence = regions.iter().map(|(_, i)| i.as_slice().len()).max().unwrap_or(0);
 
 	let then = std::time::Instant::now();
 	for _ in 0..1000 {
-		let _regions = get_regions(&base, &nodes);
+		let _regions = get_regions::<8>(&base, &nodes);
 		std::mem::forget(_regions);
 	}
 	println!("get_regions took: {:?}, len: {}", then.elapsed() / 1000, regions.len());
@@ -65,14 +65,14 @@ fn main() {
 
 		if window.is_key_released(Key::Right) {
 			rendered_regions = rendered_regions.saturating_add(1).min(nodes.len());
-			regions = get_regions(&base, &nodes[..rendered_regions]);
-			max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
+			regions = get_regions::<8>(&base, &nodes[..rendered_regions]);
+			max_influence = regions.iter().map(|(_, i)| i.as_slice().len()).max().unwrap_or(0);
 		}
 
 		if window.is_key_released(Key::Left) {
 			rendered_regions = rendered_regions.saturating_sub(1);
-			regions = get_regions(&base, &nodes[..rendered_regions]);
-			max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
+			regions = get_regions::<8>(&base, &nodes[..rendered_regions]);
+			max_influence = regions.iter().map(|(_, i)| i.as_slice().len()).max().unwrap_or(0);
 			shown_influence = shown_influence.min(max_influence);
 		}
 
@@ -81,7 +81,7 @@ fn main() {
 
 		// draw illustration
 		for (region, influence) in &regions {
-			if influence.len() != shown_influence && shown_influence != 0 {
+			if influence.as_slice().len() != shown_influence && shown_influence != 0 {
 				continue;
 			}
 
@@ -90,7 +90,7 @@ fn main() {
 
 			// draw influence
 			let mut hasher = DefaultHasher::new();
-			influence.hash(&mut hasher);
+			influence.as_slice().hash(&mut hasher);
 			let hash = hasher.finish() as u32;
 
 			for y in region.top..region.bottom {

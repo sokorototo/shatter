@@ -41,7 +41,9 @@ impl Node {
 	}
 }
 
-pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::BoundingBox, Rc<Vec<usize>>)> {
+/// Sorting `nodes` in descending order of Area of Influence massively reduces fragmentation and improves performance significantly
+/// `S` sets the interiors stack size, a small value _might_ cause an overflow and thus a panic. A custom stack is used as an optimization.
+pub fn get_regions<'a, const S: usize>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::BoundingBox, Rc<Vec<usize>>)> {
 	// TODO: Replace Rc<Vec<usize>> with RcStack<32, usize>
 	let mut partitions: Vec<(aabb::BoundingBox, Rc<Vec<usize>>)> = Vec::new();
 
@@ -50,7 +52,7 @@ pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::Boun
 		// does the node have influence on the root region?
 		if let Some(influence) = node.get_influence(&root) {
 			// store pending partition
-			let mut pending = stack::Stack::<32, aabb::BoundingBox>::new();
+			let mut pending = stack::Stack::<aabb::BoundingBox, S>::new();
 			pending.push(influence);
 
 			'shrink: loop {
