@@ -5,7 +5,6 @@ pub use aabb::BoundingBox;
 use alloc::{rc::Rc, vec::Vec};
 
 mod aabb;
-mod stack;
 
 #[cfg(test)]
 mod tests;
@@ -42,8 +41,7 @@ impl Node {
 }
 
 /// Sorting `nodes` in descending order of Area of Influence massively reduces fragmentation and improves performance significantly
-/// `S` sets the interiors stack size, a small value _might_ cause an overflow and thus a panic. A custom stack is used as an optimization.
-pub fn get_regions<'a, const S: usize>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::BoundingBox, Rc<Vec<usize>>)> {
+pub fn get_regions<'a>(root: &BoundingBox, nodes: &'a [Node]) -> Vec<(aabb::BoundingBox, Rc<Vec<usize>>)> {
 	// TODO: Replace Rc<Vec<usize>> with RcStack<32, usize>
 	let mut partitions: Vec<(aabb::BoundingBox, Rc<Vec<usize>>)> = Vec::new();
 
@@ -52,15 +50,11 @@ pub fn get_regions<'a, const S: usize>(root: &BoundingBox, nodes: &'a [Node]) ->
 		// does the node have influence on the root region?
 		if let Some(influence) = node.get_influence(&root) {
 			// store pending partition
-			let mut pending = stack::Stack::<aabb::BoundingBox, S>::new();
+			let mut pending = Vec::with_capacity(8);
 			pending.push(influence);
 
-			'shrink: loop {
-				// if stack is empty, we're done
-				if pending.len() == 0 {
-					break 'shrink;
-				}
-
+			// attempt to dissolve pending regions
+			while pending.len() != 0 {
 				// find first intersection with partitions in stack and partitions in the arena
 				let mut needle = None;
 
@@ -103,18 +97,12 @@ pub fn get_regions<'a, const S: usize>(root: &BoundingBox, nodes: &'a [Node]) ->
 					}
 					None => {
 						// None of the pending regions intersect with any of the partition in the arena
-						break 'shrink;
+						let list = Rc::new(alloc::vec![node_idx]);
+						partitions.extend(pending.into_iter().map(|p| (p, list.clone())));
+
+						break;
 					}
 				}
-			}
-
-			// push all remaining regions in the stack to the arena
-			if pending.len() > 0 {
-				let list = Rc::new(alloc::vec![node_idx]); // replace with Cow::Borrowed(&[idx]) if possible
-
-				pending.into_iter().for_each(|p| {
-					partitions.push((p, list.clone()));
-				});
 			}
 		}
 	}
