@@ -6,10 +6,13 @@ use alloc::vec::Vec;
 
 mod aabb;
 mod rc_vec;
+pub use rc_vec::RcVec;
 
 #[cfg(test)]
 mod tests;
 
+/// A `Node` is a point in 2D space with an optional area of influence, represented as width and height half extents.
+/// A `Node` is a pending allocation into a [`BoundingBox`] to be used with [`get_regions`]
 #[derive(Debug, Clone)]
 pub struct Node {
 	pub x: isize,
@@ -42,9 +45,9 @@ impl Node {
 }
 
 /// Sorting `nodes` in descending order of Area of Influence massively reduces fragmentation and improves performance significantly
-pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(aabb::BoundingBox, rc_vec::RcVec<usize>)> {
+pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(BoundingBox, RcVec<usize>)> {
 	// TODO: Replace Rc<Vec<usize>> with RcStack<32, usize>
-	let mut partitions: Vec<(aabb::BoundingBox, rc_vec::RcVec<usize>)> = Vec::new();
+	let mut partitions: Vec<(BoundingBox, rc_vec::RcVec<usize>)> = Vec::new();
 	let mut pending = Vec::with_capacity(8);
 
 	// Add each node's influence to the arena: Subdivide, Modify|Shrink, Merge
@@ -96,7 +99,7 @@ pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(aabb::BoundingBox
 					}
 					None => {
 						// None of the pending regions intersect with any of the partition in the arena
-						let influence = rc_vec::RcVec::new(alloc::vec![node_idx]);
+						let influence = RcVec::new(alloc::vec![node_idx]);
 						partitions.extend(pending.drain(..).map(|p| (p, influence.clone())));
 
 						break;

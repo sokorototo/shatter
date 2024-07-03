@@ -42,8 +42,13 @@ fn main() {
 		Node::new(400, 300, Some((100, 250))),
 	];
 
+   // generate regions
    let regions = get_regions(&arena, &nodes);
-   println!("Generated Regions: {:?}" regions);
+	for (region, influence) in partitions {
+		// `influence` is a custom type, use `as_slice` to get a conventional rust slice
+		let influence = influence.as_slice();
+		println!("Region: {:?}, Influenced Nodes: {:?}", &region, influence);
+	}
 }
 ```
 

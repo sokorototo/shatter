@@ -58,11 +58,13 @@ fn main() {
 	}
 }
 
-fn fill(nodes: &[Node], partitions: &[(BoundingBox, std::rc::Rc<Vec<usize>>)], buffer: &mut [u32]) {
+fn fill(nodes: &[Node], partitions: &[(BoundingBox, RcVec<usize>)], buffer: &mut [u32]) {
 	// Clear screen to black
 	buffer.fill(0);
 
 	for (region, influence) in partitions {
+		let influence = influence.as_slice();
+
 		for y in region.top..region.bottom {
 			for x in region.left..region.right {
 				// get closest node

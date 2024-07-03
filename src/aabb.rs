@@ -1,3 +1,4 @@
+/// A simple 2D Axis Aligned Bounding Box
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BoundingBox {
 	pub left: isize,
@@ -16,16 +17,8 @@ impl BoundingBox {
 		}
 	}
 
-	pub fn area(&self) -> isize {
-		(self.right - self.left) * (self.bottom - self.top)
-	}
-
 	pub fn contains(&self, other: &BoundingBox) -> bool {
 		self.left <= other.left && self.top <= other.top && self.right >= other.right && self.bottom >= other.bottom
-	}
-
-	pub fn contains_point(&self, x: isize, y: isize) -> bool {
-		x >= self.left && x < self.right && y >= self.top && y < self.bottom
 	}
 
 	pub fn intersects(&self, other: &BoundingBox) -> bool {
