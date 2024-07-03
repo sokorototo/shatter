@@ -91,7 +91,6 @@ pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(aabb::BoundingBox
 						}
 
 						// remove old partitions from the arena and stack
-						// TODO: These values might be of use earlier in the operation
 						pending.swap_remove(pending_idx);
 						partitions.swap_remove(partition_idx);
 					}
