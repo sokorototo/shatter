@@ -1,6 +1,6 @@
 [package]
 name = "shatter"
-license = "Mozilla Public License 2.0"
+license = "MIT"
 authors = ["Newton Toto <nyachiengatoto@gmail.com>"]
 description = "An algorithm for dividing a 2D space amond a labelled set of Axis-Aligned Bounding Boxes"
 categories = [
