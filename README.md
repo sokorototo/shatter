@@ -8,7 +8,7 @@ Given a 2D space defined by an Axis Aligned Bounding Box (AABB) and an 0-indexed
 
 ![Space Division Demo](<demos/demo.avif>)
 
-Above, a 600x600 space (The Window's draw area) is divided among several AABBs. Each AABB contains a list of indexes the the `Nodes` list initial input.
+Above, a 600x600 space (The Window's draw area) is divided among several AABBs. Each AABB contains a list of indices to the `Nodes` list initial input.
 
 ### 🧪 Sample Usage
 
