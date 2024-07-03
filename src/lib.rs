@@ -2,9 +2,10 @@
 
 extern crate alloc;
 pub use aabb::BoundingBox;
-use alloc::{rc::Rc, vec::Vec};
+use alloc::vec::Vec;
 
 mod aabb;
+mod rc_vec;
 
 #[cfg(test)]
 mod tests;
@@ -41,9 +42,9 @@ impl Node {
 }
 
 /// Sorting `nodes` in descending order of Area of Influence massively reduces fragmentation and improves performance significantly
-pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(aabb::BoundingBox, Rc<Vec<usize>>)> {
+pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(aabb::BoundingBox, rc_vec::RcVec<usize>)> {
 	// TODO: Replace Rc<Vec<usize>> with RcStack<32, usize>
-	let mut partitions: Vec<(aabb::BoundingBox, Rc<Vec<usize>>)> = Vec::new();
+	let mut partitions: Vec<(aabb::BoundingBox, rc_vec::RcVec<usize>)> = Vec::new();
 	let mut pending = Vec::with_capacity(8);
 
 	// Add each node's influence to the arena: Subdivide, Modify|Shrink, Merge
@@ -78,9 +79,8 @@ pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(aabb::BoundingBox
 						// create new partition adding this node's influence
 						let (_, influence) = partitions.get(partition_idx).expect("Arena doesn't contain specified item");
 
-						let mut new_influence = Vec::clone(influence);
-						new_influence.push(node_idx);
-						partitions.push((intersection.clone(), Rc::new(new_influence)));
+						let new_influence = influence.push(node_idx);
+						partitions.push((intersection.clone(), new_influence));
 
 						// add (partition - intersection) to the arena, remove old partition
 						let (partition, influence) = partitions.get(partition_idx).expect("Arena doesn't contain specified item").clone();
@@ -96,8 +96,8 @@ pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(aabb::BoundingBox
 					}
 					None => {
 						// None of the pending regions intersect with any of the partition in the arena
-						let list = Rc::new(alloc::vec![node_idx]);
-						partitions.extend(pending.drain(..).map(|p| (p, list.clone())));
+						let influence = rc_vec::RcVec::new(alloc::vec![node_idx]);
+						partitions.extend(pending.drain(..).map(|p| (p, influence.clone())));
 
 						break;
 					}
