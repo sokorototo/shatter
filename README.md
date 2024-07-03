@@ -28,22 +28,22 @@ const Y: isize = -400;
 const COUNT: u32 = 30;
 
 fn main() {
-	// define region
-	let arena = BoundingBox::new(X, Y, WIDTH, HEIGHT);
-	let nodes = (0..COUNT)
-		.map(|_| {
-			let x = rand_range(X as isize, X as isize + WIDTH as isize);
-			let y = rand_range(Y as isize, Y as isize + HEIGHT as isize);
+   // define region
+   let arena = BoundingBox::new(X, Y, WIDTH, HEIGHT);
+   let nodes = (0..COUNT)
+      .map(|_| {
+         let x = rand_range(X as isize, X as isize + WIDTH as isize);
+         let y = rand_range(Y as isize, Y as isize + HEIGHT as isize);
 
-			let width = rand_range(50, 200);
-			let height = rand_range(50, 200);
+         let width = rand_range(50, 200);
+         let height = rand_range(50, 200);
 
-			Node::new(x, y, Some((width, height)))
-		})
-		.collect::<Vec<_>>();
+         Node::new(x, y, Some((width, height)))
+      })
+      .collect::<Vec<_>>();
 
-	let regions = get_regions(&arena, &nodes);
-	println!("Generated Regions: {:?}" regions);
+   let regions = get_regions(&arena, &nodes);
+   println!("Generated Regions: {:?}" regions);
 }
 
 ```
