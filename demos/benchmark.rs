@@ -10,7 +10,7 @@ const X: isize = -400;
 const Y: isize = -400;
 
 const COUNT: u32 = 30;
-const ITERATIONS: u32 = 10000;
+const ITERATIONS: u32 = 100;
 
 fn main() {
 	// define region

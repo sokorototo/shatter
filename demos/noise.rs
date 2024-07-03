@@ -11,7 +11,6 @@ fn main() {
 	options.resize = false;
 	options.topmost = true;
 
-	// Limit to max ~60 fps update rate
 	let mut window = Window::new("Worley Noise Demo", WIDTH, HEIGHT, options).unwrap();
 	window.set_target_fps(30);
 

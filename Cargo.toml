@@ -13,24 +13,18 @@ categories = [
 version = "0.1.0"
 edition = "2021"
 
-[features]
-std = []
-
 [[example]]
 name = "partitioning"
 path = "demos/partitioning.rs"
-required-features = ["std"]
 
 [[example]]
 name = "noise"
 path = "demos/noise.rs"
-required-features = ["std"]
 
 
 [[example]]
 name = "benchmark"
 path = "demos/benchmark.rs"
-required-features = ["std"]
 
 [dev-dependencies]
 minifb = "0.27"

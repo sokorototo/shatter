@@ -12,40 +12,39 @@ Above, a 600x600 space (The Window's draw area) is divided among several AABBs. 
 
 ### 🧪 Sample Usage
 
+The example below basically describes the setup for the above image, minus rendering.
+
 ```rust
 use shatter::*;
-use simplerand::rand_range;
 
-// define 800x800 space
-const WIDTH: isize = 800;
-const HEIGHT: isize = 800;
+// define 600x600 space
+const WIDTH: isize = 600;
+const HEIGHT: isize = 600;
 
 // space goes into the negatives
-const X: isize = -400;
-const Y: isize = -400;
-
-// Generate 30 nodes
-const COUNT: u32 = 30;
+const X: isize = -200;
+const Y: isize = -200;
 
 fn main() {
    // define region
    let arena = BoundingBox::new(X, Y, WIDTH, HEIGHT);
-   let nodes = (0..COUNT)
-      .map(|_| {
-         let x = rand_range(X as isize, X as isize + WIDTH as isize);
-         let y = rand_range(Y as isize, Y as isize + HEIGHT as isize);
 
-         let width = rand_range(50, 200);
-         let height = rand_range(50, 200);
-
-         Node::new(x, y, Some((width, height)))
-      })
-      .collect::<Vec<_>>();
+	// define Nodes
+	let mut nodes = [
+		Node::new(0, 0, Some((550, 210))),
+		Node::new(75, 150, Some((25, 30))),
+		Node::square(400, 400, Some(100)),
+		Node::new(410, 350, Some((100, 70))),
+		Node::square(150, 150, Some(300)),
+		Node::square(350, 400, Some(75)),
+		Node::new(450, 200, Some((100, 75))),
+		Node::new(150, 250, Some((60, 250))),
+		Node::new(400, 300, Some((100, 250))),
+	];
 
    let regions = get_regions(&arena, &nodes);
    println!("Generated Regions: {:?}" regions);
 }
-
 ```
 
 ### 💭 Uses
@@ -58,3 +57,4 @@ I don't know, I wasted one weekend thinking this shit out. I wrote it as an opti
 
 ### 📃 TODO
  - Make `BoundingBox` struct generic over a numerical type, or just use `f32` instead of `isize`
+ - Fix `noise` example
