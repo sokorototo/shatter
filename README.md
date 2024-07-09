@@ -6,7 +6,8 @@
 
 Given a 2D space defined by an Axis Aligned Bounding Box (AABB) and an 0-indexed array of `&[Nodes]`, a node being a 2D point anywhere and an optional area of influence, `shatter` returns a list on non-intersecting Axis Aligned Bounding Boxes with each AABB containing a list of indexes to `Nodes` that contest influence within the AABB. Find below a demonstration image:
 
-![Space Division Demo](<demos/demo.avif>)
+ - ![Space Division Demo](<demos/demo.avif>)
+ - ###### Regions with the same influence list have the same colour.
 
 Above, a 600x600 space (The Window's draw area) is divided among several AABBs. Each AABB contains a list of indices to the `Nodes` list initial input.
 
