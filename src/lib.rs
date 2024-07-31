@@ -13,7 +13,7 @@ mod tests;
 
 /// A `Node` is a point in 2D space with an optional area of influence, represented as width and height half extents.
 /// A `Node` is a pending allocation into a [`BoundingBox`] to be used with [`get_regions`]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash, PartialEq)]
 pub struct Node {
 	pub x: isize,
 	pub y: isize,
