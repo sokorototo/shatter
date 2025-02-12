@@ -30,26 +30,26 @@ fn main() {
    // define region
    let arena = BoundingBox::new(X, Y, WIDTH, HEIGHT);
 
-	// define Nodes
-	let mut nodes = [
-		Node::new(0, 0, Some((550, 210))),
-		Node::new(75, 150, Some((25, 30))),
-		Node::square(400, 400, Some(100)),
-		Node::new(410, 350, Some((100, 70))),
-		Node::square(150, 150, Some(300)),
-		Node::square(350, 400, Some(75)),
-		Node::new(450, 200, Some((100, 75))),
-		Node::new(150, 250, Some((60, 250))),
-		Node::new(400, 300, Some((100, 250))),
-	];
+   // define Nodes
+   let mut nodes = [
+      Node::new(0, 0, Some((550, 210))),
+      Node::new(75, 150, Some((25, 30))),
+      Node::square(400, 400, Some(100)),
+      Node::new(410, 350, Some((100, 70))),
+      Node::square(150, 150, Some(300)),
+      Node::square(350, 400, Some(75)),
+      Node::new(450, 200, Some((100, 75))),
+      Node::new(150, 250, Some((60, 250))),
+      Node::new(400, 300, Some((100, 250))),
+   ];
 
    // generate regions
    let regions = get_regions(&arena, &nodes);
-	for (region, influence) in partitions {
-		// `influence` is a custom type, use `as_slice` to get a conventional rust slice
-		let influence = influence.as_slice();
-		println!("Region: {:?}, Influenced Nodes: {:?}", &region, influence);
-	}
+   for (region, influence) in regions {
+      // `influence` is a custom type, use `as_slice` to get a conventional rust slice
+      let influence = influence.as_slice();
+      println!("Region: {:?}, Influenced Nodes: {:?}", &region, influence);
+   }
 }
 ```
 
