@@ -13,7 +13,7 @@ mod tests;
 
 /// A `Node` is a point in 2D space with an optional area of influence, represented as width and height half extents.
 /// A `Node` is a pending allocation into a [`BoundingBox`] to be used with [`get_regions`]
-#[derive(Debug, Clone, Hash, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct Node {
 	pub x: isize,
 	pub y: isize,
@@ -46,7 +46,6 @@ impl Node {
 
 /// Sorting `nodes` in descending order of Area of Influence massively reduces fragmentation and improves performance significantly
 pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(BoundingBox, RcVec<usize>)> {
-	// TODO: Replace Rc<Vec<usize>> with RcStack<32, usize>
 	let mut partitions: Vec<(BoundingBox, rc_vec::RcVec<usize>)> = Vec::new();
 	let mut pending = Vec::with_capacity(8);
 

@@ -207,7 +207,7 @@ fn test_get_regions() {
 					top: 175,
 					bottom: 200
 				},
-				Rc::new(vec![0])
+				vec![0].into()
 			),
 			(
 				BoundingBox {
@@ -216,7 +216,7 @@ fn test_get_regions() {
 					top: 100,
 					bottom: 175
 				},
-				Rc::new(vec![0, 1])
+				vec![0, 1].into()
 			),
 			(
 				BoundingBox {
@@ -225,7 +225,7 @@ fn test_get_regions() {
 					top: 75,
 					bottom: 100
 				},
-				Rc::new(vec![1])
+				vec![1].into()
 			)
 		]
 	);
@@ -241,7 +241,7 @@ fn test_get_regions() {
 					top: 0,
 					bottom: 50
 				},
-				Rc::new(vec![0])
+				vec![0].into()
 			),
 			(
 				BoundingBox {
@@ -250,7 +250,7 @@ fn test_get_regions() {
 					top: 75,
 					bottom: 175
 				},
-				Rc::new(vec![1])
+				vec![1].into()
 			)
 		]
 	);
@@ -266,7 +266,7 @@ fn test_get_regions() {
 					top: 125,
 					bottom: 175
 				},
-				Rc::new(vec![0])
+				vec![0].into()
 			),
 			(
 				BoundingBox {
@@ -275,7 +275,7 @@ fn test_get_regions() {
 					top: 125,
 					bottom: 175
 				},
-				Rc::new(vec![0, 1])
+				vec![0, 1].into()
 			),
 			(
 				BoundingBox {
@@ -284,7 +284,7 @@ fn test_get_regions() {
 					top: 100,
 					bottom: 125
 				},
-				Rc::new(vec![0])
+				vec![0].into()
 			),
 			(
 				BoundingBox {
@@ -293,7 +293,7 @@ fn test_get_regions() {
 					top: 175,
 					bottom: 200
 				},
-				Rc::new(vec![0])
+				vec![0].into()
 			),
 			(
 				BoundingBox {
@@ -302,7 +302,7 @@ fn test_get_regions() {
 					top: 125,
 					bottom: 175
 				},
-				Rc::new(vec![0])
+				vec![0].into()
 			)
 		]
 	);

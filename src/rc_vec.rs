@@ -9,6 +9,18 @@ pub struct RcVec<T> {
 	source: Rc<UnsafeCell<Vec<T>>>,
 }
 
+impl<T: PartialEq> PartialEq for RcVec<T> {
+	fn eq(&self, other: &Self) -> bool {
+		self.as_slice() == other.as_slice()
+	}
+}
+
+impl<T> From<Vec<T>> for RcVec<T> {
+	fn from(value: Vec<T>) -> Self {
+		RcVec::new(value)
+	}
+}
+
 impl<T: core::fmt::Debug> core::fmt::Debug for RcVec<T> {
 	fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
 		self.as_slice().fmt(f)
@@ -23,7 +35,7 @@ impl<T> RcVec<T> {
 		}
 	}
 
-	#[must_use = "The original RcVec remains unused, a new modified RcVec is returned instead"]
+	#[must_use = "The original RcVec remains untouched, the new instance should be used"]
 	pub(crate) fn push(&self, item: T) -> RcVec<T> {
 		unsafe {
 			let source = self.source.get().as_mut().unwrap_unchecked();

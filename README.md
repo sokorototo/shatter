@@ -1,4 +1,4 @@
-<h4 align=center>🥃 shatter: A dumb 2D space allocation algorithm</h4>
+<h4 align=center>🥃 shatter: A 2D space allocation algorithm allowing intersecting pages</h4>
 <p align=center>
   <img alt="GitHub License" src="https://img.shields.io/github/license/sokorototo/shatter?style=flat-square">
   <a href="https://github.com/sokorototo/shatter/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues-raw/sokorototo/shatter?style=flat-square"></a>
