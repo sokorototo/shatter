@@ -153,7 +153,7 @@ fn get_node_influence() {
 
 	// test cases
 	assert_eq!(
-		middle.get_influence(&aabb),
+		middle.intersection(&aabb),
 		Some(BoundingBox {
 			left: 50,
 			right: 150,
@@ -162,7 +162,7 @@ fn get_node_influence() {
 		})
 	);
 	assert_eq!(
-		top_left.get_influence(&aabb),
+		top_left.intersection(&aabb),
 		Some(BoundingBox {
 			left: 0,
 			right: 50,
@@ -171,7 +171,7 @@ fn get_node_influence() {
 		})
 	);
 	assert_eq!(
-		bottom_right.get_influence(&aabb),
+		bottom_right.intersection(&aabb),
 		Some(BoundingBox {
 			left: 150,
 			right: 200,
@@ -180,7 +180,7 @@ fn get_node_influence() {
 		})
 	);
 	assert_eq!(
-		outside.get_influence(&aabb),
+		outside.intersection(&aabb),
 		Some(BoundingBox {
 			left: 160,
 			right: 200,
@@ -188,8 +188,8 @@ fn get_node_influence() {
 			bottom: 300
 		})
 	);
-	assert_eq!(far.get_influence(&aabb), None);
-	assert_eq!(infinite.get_influence(&aabb), Some(aabb));
+	assert_eq!(far.intersection(&aabb), None);
+	assert_eq!(infinite.intersection(&aabb), Some(aabb));
 }
 
 #[test]

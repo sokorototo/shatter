@@ -39,7 +39,7 @@ fn main() {
 
 	// Get regions
 	let mut regions = get_regions(&base, &nodes);
-	let mut max_influence = regions.iter().map(|(_, i)| i.as_slice().len()).max().unwrap_or(0);
+	let mut max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
 
 	let then = std::time::Instant::now();
 	for _ in 0..1000 {
@@ -66,13 +66,13 @@ fn main() {
 		if window.is_key_released(Key::Right) {
 			rendered_regions = rendered_regions.saturating_add(1).min(nodes.len());
 			regions = get_regions(&base, &nodes[..rendered_regions]);
-			max_influence = regions.iter().map(|(_, i)| i.as_slice().len()).max().unwrap_or(0);
+			max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
 		}
 
 		if window.is_key_released(Key::Left) {
 			rendered_regions = rendered_regions.saturating_sub(1);
 			regions = get_regions(&base, &nodes[..rendered_regions]);
-			max_influence = regions.iter().map(|(_, i)| i.as_slice().len()).max().unwrap_or(0);
+			max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
 			shown_influence = shown_influence.min(max_influence);
 		}
 
@@ -81,7 +81,7 @@ fn main() {
 
 		// draw illustration
 		for (region, influence) in &regions {
-			if influence.as_slice().len() != shown_influence && shown_influence != 0 {
+			if influence.len() != shown_influence && shown_influence != 0 {
 				continue;
 			}
 
@@ -90,7 +90,7 @@ fn main() {
 
 			// draw influence
 			let mut hasher = DefaultHasher::new();
-			influence.as_slice().hash(&mut hasher);
+			influence.hash(&mut hasher);
 			let hash = hasher.finish() as u32;
 
 			for y in region.top..region.bottom {

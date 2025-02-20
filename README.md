@@ -46,8 +46,8 @@ fn main() {
    // generate regions
    let regions = get_regions(&arena, &nodes);
    for (region, influence) in regions {
-      // `influence` is a custom type, use `as_slice` to get a conventional rust slice
-      let influence = influence.as_slice();
+      // `influence` is a custom type, use `as_ref` to get a slice into the data
+      let influence = influence.as_ref();
       println!("Region: {:?}, Influenced Nodes: {:?}", &region, influence);
    }
 }

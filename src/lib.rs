@@ -31,7 +31,7 @@ impl Node {
 	}
 
 	// creates a Bounding box based on the node's influence
-	pub fn get_influence(&self, bound: &aabb::BoundingBox) -> Option<aabb::BoundingBox> {
+	pub fn intersection(&self, bound: &aabb::BoundingBox) -> Option<aabb::BoundingBox> {
 		match self.half_extents {
 			Some((x, y)) => bound.intersection(&aabb::BoundingBox {
 				left: self.x.saturating_sub(x),
@@ -51,8 +51,8 @@ pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(BoundingBox, RcVe
 
 	// Add each node's influence to the arena: Subdivide, Modify|Shrink, Merge
 	for (node_idx, node) in nodes.iter().enumerate() {
-		// does the node have influence on the root region?
-		if let Some(influence) = node.get_influence(root) {
+		// does the node intersect the root region?
+		if let Some(influence) = node.intersection(root) {
 			// store pending partition
 			pending.push(influence);
 
