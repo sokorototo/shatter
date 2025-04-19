@@ -1,19 +1,19 @@
 use alloc::{rc::Rc, vec::Vec};
 use core::{
 	cell::UnsafeCell,
+	iter,
 	ops::{Deref, DerefMut},
 };
-use std::iter;
 
 /// Append only Reference Counted Vector with optimizations relevant to `shatter`.
 /// Dereferences to an ordinary Rust slice.
 #[derive(Clone)]
-pub struct RcVec<T: Clone> {
+pub struct RcVec<T> {
 	count: usize,
 	source: Rc<UnsafeCell<Vec<T>>>,
 }
 
-impl<T: Clone> Deref for RcVec<T> {
+impl<T> Deref for RcVec<T> {
 	type Target = [T];
 
 	fn deref(&self) -> &Self::Target {
@@ -22,20 +22,20 @@ impl<T: Clone> Deref for RcVec<T> {
 	}
 }
 
-impl<T: Clone> DerefMut for RcVec<T> {
+impl<T> DerefMut for RcVec<T> {
 	fn deref_mut(&mut self) -> &mut Self::Target {
 		let source = unsafe { self.source.get().as_mut().unwrap_unchecked() };
 		&mut source[..self.count]
 	}
 }
 
-impl<T: PartialEq + Clone> PartialEq for RcVec<T> {
+impl<T: PartialEq> PartialEq for RcVec<T> {
 	fn eq(&self, other: &Self) -> bool {
 		self.as_ref() == other.as_ref()
 	}
 }
 
-impl<T: core::fmt::Debug + Clone> core::fmt::Debug for RcVec<T> {
+impl<T: core::fmt::Debug> core::fmt::Debug for RcVec<T> {
 	fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
 		self.as_ref().fmt(f)
 	}

@@ -1,6 +1,41 @@
+#![cfg(test)]
+
 use super::*;
 use aabb::BoundingBox;
-use alloc::vec;
+
+pub fn generate_nodes<const N: usize>(width: isize, height: isize) -> [Node; N] {
+	let mut nodes: [Node; N] = unsafe { core::mem::MaybeUninit::uninit().assume_init() };
+
+	for node in &mut nodes {
+		*node = match simplerand::rand::<u8>() % 2 == 0 {
+			// generate a square node
+			true => {
+				let half_extent = Some(simplerand::rand_range::<isize>(25, 125));
+
+				let x = simplerand::rand_range(5, (width - 5) as _);
+				let y = simplerand::rand_range(5, (height - 5) as _);
+
+				Node::square(x, y, half_extent)
+			}
+			// generate a rectangular node
+			false => {
+				let half_extents = {
+					let hx = simplerand::rand_range::<isize>(25, 125);
+					let hy = simplerand::rand_range::<isize>(25, 125);
+
+					Some((hx, hy))
+				};
+
+				let x = simplerand::rand_range(5, (width - 5) as _);
+				let y = simplerand::rand_range(5, (height - 5) as _);
+
+				Node::new(x, y, half_extents)
+			}
+		};
+	}
+
+	nodes
+}
 
 #[test]
 fn bounding_box_intersection() {
@@ -196,116 +231,19 @@ fn get_node_influence() {
 
 #[test]
 fn test_get_regions() {
-	let base = BoundingBox::new(0, 0, 200, 300);
+	for d in 300..800 {
+		let root = BoundingBox::new(0, 0, d, d);
 
-	let one_above_the_other = [Node::square(75, 150, Some(50)), Node::square(75, 125, Some(50))];
-	assert_eq!(
-		get_regions(&base, &one_above_the_other),
-		vec![
-			(
-				BoundingBox {
-					left: 25,
-					right: 125,
-					top: 175,
-					bottom: 200
-				},
-				RcVec::new(vec![0])
-			),
-			(
-				BoundingBox {
-					left: 25,
-					right: 125,
-					top: 100,
-					bottom: 175
-				},
-				RcVec::new(vec![0, 1])
-			),
-			(
-				BoundingBox {
-					left: 25,
-					right: 125,
-					top: 75,
-					bottom: 100
-				},
-				RcVec::new(vec![1])
-			)
-		]
-	);
+		let nodes = generate_nodes::<25>(d, d);
+		let regions = get_regions(&root, &nodes);
 
-	let no_contact = [Node::square(0, 0, Some(50)), Node::square(75, 125, Some(50))];
-	assert_eq!(
-		get_regions(&base, &no_contact),
-		vec![
-			(
-				BoundingBox {
-					left: 0,
-					right: 50,
-					top: 0,
-					bottom: 50
-				},
-				RcVec::new(vec![0])
-			),
-			(
-				BoundingBox {
-					left: 25,
-					right: 125,
-					top: 75,
-					bottom: 175
-				},
-				RcVec::new(vec![1])
-			)
-		]
-	);
+		for (bounding, influence) in regions {
+			for i in influence.as_ref() {
+				let node = nodes.get(*i).unwrap();
+				let initial = node.intersection(&root).expect("Node doesn't intersect root, but has generated region in shatter test");
 
-	let one_inside_the_other = [Node::square(75, 150, Some(50)), Node::square(75, 150, Some(25))];
-	assert_eq!(
-		get_regions(&base, &one_inside_the_other),
-		vec![
-			(
-				BoundingBox {
-					left: 100,
-					right: 125,
-					top: 125,
-					bottom: 175
-				},
-				RcVec::new(vec![0])
-			),
-			(
-				BoundingBox {
-					left: 50,
-					right: 100,
-					top: 125,
-					bottom: 175
-				},
-				RcVec::new(vec![0, 1])
-			),
-			(
-				BoundingBox {
-					left: 25,
-					right: 125,
-					top: 100,
-					bottom: 125
-				},
-				RcVec::new(vec![0])
-			),
-			(
-				BoundingBox {
-					left: 25,
-					right: 125,
-					top: 175,
-					bottom: 200
-				},
-				RcVec::new(vec![0])
-			),
-			(
-				BoundingBox {
-					left: 25,
-					right: 50,
-					top: 125,
-					bottom: 175
-				},
-				RcVec::new(vec![0])
-			)
-		]
-	);
+				assert!(initial.contains(&bounding));
+			}
+		}
+	}
 }

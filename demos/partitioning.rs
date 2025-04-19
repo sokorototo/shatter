@@ -69,7 +69,7 @@ fn main() {
 	let mut max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
 
 	// only draw regions with a certain amount of influence
-	let mut rendered_regions: usize = nodes.len();
+	let mut rendered_regions: usize = nodes.len() / 2;
 	let mut shown_influence: usize = 0;
 
 	// Update window

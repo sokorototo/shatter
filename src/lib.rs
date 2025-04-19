@@ -1,4 +1,4 @@
-// #![no_std]
+#![no_std]
 
 extern crate alloc;
 pub use aabb::BoundingBox;
@@ -8,8 +8,7 @@ mod aabb;
 mod rc_vec;
 pub use rc_vec::RcVec;
 
-#[cfg(test)]
-mod tests;
+pub mod tests;
 
 /// A `Node` is a point in 2D space with an optional area of influence, represented as width and height half extents.
 /// A `Node` is a pending allocation into a [`BoundingBox`] to be used with [`get_regions`]
@@ -31,15 +30,15 @@ impl Node {
 	}
 
 	// creates a Bounding box based on the node's influence
-	pub fn intersection(&self, bound: &aabb::BoundingBox) -> Option<aabb::BoundingBox> {
+	pub fn intersection(&self, root: &aabb::BoundingBox) -> Option<aabb::BoundingBox> {
 		match self.half_extents {
-			Some((x, y)) => bound.intersection(&aabb::BoundingBox {
+			Some((x, y)) => root.intersection(&aabb::BoundingBox {
 				left: self.x.saturating_sub(x),
 				top: self.y.saturating_sub(y),
 				right: self.x.saturating_add(x),
 				bottom: self.y.saturating_add(y),
 			}),
-			None => Some(bound.clone()),
+			None => Some(root.clone()),
 		}
 	}
 }
