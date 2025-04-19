@@ -46,7 +46,7 @@ impl BoundingBox {
 	}
 
 	// subtracts the other bounding box from this bounding box
-	pub fn difference(&self, rhs: &BoundingBox) -> (usize, [BoundingBox; 4]) {
+	pub fn subtraction(&self, rhs: &BoundingBox) -> (usize, [BoundingBox; 4]) {
 		let mut regions: [BoundingBox; 4] = unsafe { core::mem::MaybeUninit::zeroed().assume_init() };
 		let mut idx = 0;
 
@@ -91,5 +91,14 @@ impl BoundingBox {
 		}
 
 		(idx, regions)
+	}
+
+	pub fn union(&self, other: &BoundingBox) -> BoundingBox {
+		BoundingBox {
+			left: self.left.min(other.left),
+			top: self.top.min(other.top),
+			right: self.right.max(other.right),
+			bottom: self.bottom.max(other.bottom),
+		}
 	}
 }

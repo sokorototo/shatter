@@ -1,4 +1,4 @@
-use std::{hint::black_box, time::Instant, vec::Vec};
+use std::{time::Instant, vec::Vec};
 
 use shatter::*;
 use simplerand::rand_range;
@@ -28,10 +28,8 @@ fn main() {
 		.collect::<Vec<_>>();
 
 	// benchmark
+	let mut regions = Vec::with_capacity(ITERATIONS as usize);
 	let then = Instant::now();
-	for _ in 0..ITERATIONS {
-		let regions = get_regions(&arena, &nodes);
-		let _ = black_box(regions);
-	}
+	regions.extend((0..ITERATIONS).map(|_| get_regions(&arena, &nodes)));
 	println!("get_regions took: {:?}", then.elapsed() / ITERATIONS);
 }

@@ -1,4 +1,4 @@
-#![no_std]
+// #![no_std]
 
 extern crate alloc;
 pub use aabb::BoundingBox;
@@ -52,19 +52,18 @@ pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(BoundingBox, RcVe
 	// Add each node's influence to the arena: Subdivide, Modify|Shrink, Merge
 	for (node_idx, node) in nodes.iter().enumerate() {
 		// does the node intersect the root region?
-		if let Some(influence) = node.intersection(root) {
-			// store pending partition
-			pending.push(influence);
+		if let Some(initial) = node.intersection(root) {
+			pending.push(initial);
 
 			// attempt to dissolve pending regions
 			while !pending.is_empty() {
 				// find first intersection with partitions in stack and partitions in the arena
 				let mut needle = None;
 
-				'search: for (stack_idx, p) in pending.as_slice().iter().enumerate() {
-					for (idx, (partition, _)) in partitions.iter().enumerate() {
-						if let Some(intersection) = partition.intersection(p) {
-							needle = Some((intersection, idx, stack_idx));
+				'search: for (pending_idx, pending) in pending.as_slice().iter().enumerate() {
+					for (partition_idx, (partition, ..)) in partitions.iter().enumerate() {
+						if let Some(intersection) = partition.intersection(pending) {
+							needle = Some((intersection, partition_idx, pending_idx));
 							break 'search;
 						}
 					}
@@ -73,28 +72,25 @@ pub fn get_regions(root: &BoundingBox, nodes: &[Node]) -> Vec<(BoundingBox, RcVe
 				match needle {
 					Some((intersection, partition_idx, pending_idx)) => {
 						// add (pending - intersection) to the pending stack
-						let (count, descendants) = pending.get(pending_idx).expect("Item not found in stack?").difference(&intersection);
-						for new_pending in &descendants[..count] {
-							pending.push(new_pending.clone());
+						let (count, remainders) = pending.get(pending_idx).unwrap().subtraction(&intersection);
+						for remainder in &remainders[..count] {
+							pending.push(remainder.clone());
 						}
 
-						// create new partition adding this node's influence
-						let (_, influence) = partitions.get(partition_idx).expect("Arena doesn't contain specified item");
-
-						let new_influence = influence.push(node_idx);
-						partitions.push((intersection.clone(), new_influence));
+						// create new partition (pending & partition) adding this node's influence
+						let (partition, influence) = partitions.get(partition_idx).unwrap().clone();
+						partitions.push((intersection.clone(), influence.push(node_idx)));
 
 						// add (partition - intersection) to the arena, remove old partition
-						let (partition, influence) = partitions.get(partition_idx).expect("Arena doesn't contain specified item").clone();
+						partitions.swap_remove(partition_idx);
 
-						let (count, descendants) = partition.difference(&intersection);
-						for new_region in &descendants[..count] {
-							partitions.push((new_region.clone(), influence.clone()));
+						let (count, remainder) = partition.subtraction(&intersection);
+						for remainder in &remainder[..count] {
+							partitions.push((remainder.clone(), influence.clone()));
 						}
 
 						// remove old partitions from the arena and stack
 						pending.swap_remove(pending_idx);
-						partitions.swap_remove(partition_idx);
 					}
 					None => {
 						// None of the pending regions intersect with any of the partition in the arena

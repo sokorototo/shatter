@@ -7,12 +7,14 @@ fn bounding_box_intersection() {
 	let base = BoundingBox::new(50, 50, 100, 100);
 
 	let normal = base.intersection(&BoundingBox::new(30, 30, 50, 50));
+	let inverted = BoundingBox::new(30, 30, 50, 50).intersection(&base);
 	let no_intersection = base.intersection(&BoundingBox::new(0, 0, 40, 40));
 	let contained = BoundingBox::new(75, 75, 25, 25).intersection(&base);
 	let contained2 = base.intersection(&BoundingBox::new(75, 75, 25, 25));
 
 	// assert
 	assert_eq!(normal, Some(BoundingBox::new(50, 50, 30, 30)));
+	assert_eq!(inverted, normal);
 	assert_eq!(no_intersection, None);
 	assert_eq!(contained, contained2);
 }
@@ -36,7 +38,7 @@ fn bounding_box_subtract() {
 	let base = BoundingBox::new(50, 50, 50, 50);
 
 	let side = BoundingBox::new(60, 60, 20, 20);
-	let (count, res) = base.difference(&side);
+	let (count, res) = base.subtraction(&side);
 	assert_eq!(
 		&res[..count],
 		&[
@@ -68,10 +70,10 @@ fn bounding_box_subtract() {
 	);
 
 	let no_intersect = BoundingBox::new(0, 0, 40, 40);
-	assert_eq!(base.difference(&no_intersect).0, 0);
+	assert_eq!(base.subtraction(&no_intersect).0, 0);
 
 	let corner = BoundingBox::new(75, 75, 25, 25);
-	let (count, res) = base.difference(&corner);
+	let (count, res) = base.subtraction(&corner);
 	assert_eq!(
 		&res[..count],
 		&[
@@ -91,7 +93,7 @@ fn bounding_box_subtract() {
 	);
 
 	let contained = BoundingBox::new(60, 60, 20, 20);
-	let (count, res) = base.difference(&contained);
+	let (count, res) = base.subtraction(&contained);
 	assert_eq!(
 		&res[..count],
 		[
@@ -123,7 +125,7 @@ fn bounding_box_subtract() {
 	);
 
 	let perfectly_vertical = BoundingBox::new(50, 75, 50, 25);
-	let (count, res) = base.difference(&perfectly_vertical);
+	let (count, res) = base.subtraction(&perfectly_vertical);
 	assert_eq!(
 		&res[..count],
 		&[BoundingBox {
@@ -135,7 +137,7 @@ fn bounding_box_subtract() {
 	);
 
 	let fully_contained = base.clone();
-	let (count, _) = base.difference(&fully_contained);
+	let (count, _) = base.subtraction(&fully_contained);
 	assert_eq!(count, 0);
 }
 
@@ -207,7 +209,7 @@ fn test_get_regions() {
 					top: 175,
 					bottom: 200
 				},
-				vec![0].into()
+				RcVec::new(vec![0])
 			),
 			(
 				BoundingBox {
@@ -216,7 +218,7 @@ fn test_get_regions() {
 					top: 100,
 					bottom: 175
 				},
-				vec![0, 1].into()
+				RcVec::new(vec![0, 1])
 			),
 			(
 				BoundingBox {
@@ -225,7 +227,7 @@ fn test_get_regions() {
 					top: 75,
 					bottom: 100
 				},
-				vec![1].into()
+				RcVec::new(vec![1])
 			)
 		]
 	);
@@ -241,7 +243,7 @@ fn test_get_regions() {
 					top: 0,
 					bottom: 50
 				},
-				vec![0].into()
+				RcVec::new(vec![0])
 			),
 			(
 				BoundingBox {
@@ -250,7 +252,7 @@ fn test_get_regions() {
 					top: 75,
 					bottom: 175
 				},
-				vec![1].into()
+				RcVec::new(vec![1])
 			)
 		]
 	);
@@ -266,7 +268,7 @@ fn test_get_regions() {
 					top: 125,
 					bottom: 175
 				},
-				vec![0].into()
+				RcVec::new(vec![0])
 			),
 			(
 				BoundingBox {
@@ -275,7 +277,7 @@ fn test_get_regions() {
 					top: 125,
 					bottom: 175
 				},
-				vec![0, 1].into()
+				RcVec::new(vec![0, 1])
 			),
 			(
 				BoundingBox {
@@ -284,7 +286,7 @@ fn test_get_regions() {
 					top: 100,
 					bottom: 125
 				},
-				vec![0].into()
+				RcVec::new(vec![0])
 			),
 			(
 				BoundingBox {
@@ -293,7 +295,7 @@ fn test_get_regions() {
 					top: 175,
 					bottom: 200
 				},
-				vec![0].into()
+				RcVec::new(vec![0])
 			),
 			(
 				BoundingBox {
@@ -302,7 +304,7 @@ fn test_get_regions() {
 					top: 125,
 					bottom: 175
 				},
-				vec![0].into()
+				RcVec::new(vec![0])
 			)
 		]
 	);
