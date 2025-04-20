@@ -2,6 +2,7 @@
 
 use super::*;
 use aabb::BoundingBox;
+use alloc::collections;
 
 pub fn generate_nodes<const N: usize>(width: isize, height: isize) -> [Node; N] {
 	let mut nodes: [Node; N] = unsafe { core::mem::MaybeUninit::uninit().assume_init() };
@@ -237,13 +238,32 @@ fn test_get_regions() {
 		let nodes = generate_nodes::<25>(d, d);
 		let regions = get_regions(&root, &nodes);
 
+		let mut reverse = collections::BTreeMap::new();
+
 		for (bounding, influence) in regions {
 			for i in influence.as_ref() {
 				let node = nodes.get(*i).unwrap();
 				let initial = node.intersection(&root).expect("Node doesn't intersect root, but has generated region in shatter test");
 
-				assert!(initial.contains(&bounding));
+				assert!(initial.contains(&bounding), "Initial Node region does not fully contain inner region");
+
+				// add bounding to reverse map
+				let _bounding = bounding.clone();
+				let (_, vector) = reverse.entry(*i).or_insert_with(move || (initial, alloc::vec![_bounding]));
+				vector.push(bounding.clone());
 			}
+		}
+
+		// ensure sub-regions sum up to the area of the larger region
+		for (_, (total, section)) in reverse {
+			fn area(bb: BoundingBox) -> isize {
+				(bb.right - bb.left) * (bb.bottom - bb.top)
+			}
+
+			let total_area = area(total);
+			let total_section_area = section.into_iter().map(area).sum::<isize>();
+
+			assert_eq!(total_area, total_section_area, "Total Region Area doesn't sum up to Node Area");
 		}
 	}
 }

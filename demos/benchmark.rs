@@ -17,8 +17,8 @@ fn main() {
 	let arena = BoundingBox::new(X, Y, WIDTH, HEIGHT);
 	let nodes = (0..COUNT)
 		.map(|_| {
-			let x = rand_range(X as isize, X as isize + WIDTH as isize);
-			let y = rand_range(Y as isize, Y as isize + HEIGHT as isize);
+			let x = rand_range(X, X + WIDTH);
+			let y = rand_range(Y, Y + HEIGHT);
 
 			let width = rand_range(50, 200);
 			let height = rand_range(50, 200);
