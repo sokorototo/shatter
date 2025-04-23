@@ -13,8 +13,8 @@ pub fn generate_nodes<const N: usize>(width: isize, height: isize) -> [Node; N] 
 			true => {
 				let half_extent = Some(simplerand::rand_range::<isize>(25, 125));
 
-				let x = simplerand::rand_range(5, (width - 5));
-				let y = simplerand::rand_range(5, (height - 5));
+				let x = simplerand::rand_range(5, width - 5);
+				let y = simplerand::rand_range(5, height - 5);
 
 				Node::square(x, y, half_extent)
 			}
@@ -27,8 +27,8 @@ pub fn generate_nodes<const N: usize>(width: isize, height: isize) -> [Node; N] 
 					Some((hx, hy))
 				};
 
-				let x = simplerand::rand_range(5, (width - 5));
-				let y = simplerand::rand_range(5, (height - 5));
+				let x = simplerand::rand_range(5, width - 5);
+				let y = simplerand::rand_range(5, height - 5);
 
 				Node::new(x, y, half_extents)
 			}
