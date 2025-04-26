@@ -13,7 +13,7 @@ Above, a 600x600 space (The Window's draw area) is divided among several AABBs. 
 
 ### 🧪 Sample Usage
 
-The example below basically describes the setup for the above image, minus rendering.
+The example below describes the setup for the above image, minus rendering.
 
 ```rust
 use shatter::*;
@@ -56,11 +56,3 @@ fn main() {
 ### 💭 Uses
 
 I don't know, I wasted one weekend thinking this shit out. I wrote it as an optimization to Worley Noise generation on the CPU. A percentage of the remaining space is unallocated and effectively work that's discarded by the eventual pixel filling algorithm. For the allocated AABBs, it a comparison for the closes pixel in a very small array (with 30 nodes the max AABB index size is about 7 and most AABBs are in the 2-4 range). That aside, knock yourself out finding uses for this shit 😆
-
-## ⚙️ How it works
-
-#### \> WIP 🚧 <
-
-### 📃 TODO
- - Make `BoundingBox` struct generic over a numerical type, or just use `f32` instead of `isize`
- - Fix `noise` example
