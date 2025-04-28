@@ -27,11 +27,11 @@ const X: isize = -200;
 const Y: isize = -200;
 
 fn main() {
-   // define region
-   let arena = BoundingBox::new(X, Y, WIDTH, HEIGHT);
+   // define root region
+   let root = BoundingBox::new(X, Y, WIDTH, HEIGHT);
 
-   // define Nodes
-   let mut nodes = [
+   // define intersections
+   let mut areas = [
       Node::new(0, 0, Some((550, 210))),
       Node::new(75, 150, Some((25, 30))),
       Node::square(400, 400, Some(100)),
@@ -44,11 +44,11 @@ fn main() {
    ];
 
    // generate regions
-   let regions = get_regions(&arena, &nodes);
-   for (region, influence) in regions {
+   let regions = get_regions(&root, &areas);
+   for (volume, intersections) in regions {
       // `influence` is a custom type, use `as_ref` to get a slice into the data
-      let influence = influence.as_ref();
-      println!("Region: {:?}, Influenced Nodes: {:?}", &region, influence);
+      let intersections = intersections.as_ref();
+      println!("Region: {:?}, Intersecting Areas: {:?}", &volume, influence);
    }
 }
 ```
