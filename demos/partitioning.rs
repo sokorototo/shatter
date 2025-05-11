@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 use std::{
 	hash::{DefaultHasher, Hash, Hasher},
 	mem,
