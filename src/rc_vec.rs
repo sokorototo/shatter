@@ -11,6 +11,8 @@ use core::{
 pub struct RcVec<T> {
 	count: usize,
 	source: Rc<UnsafeCell<Vec<T>>>,
+	#[cfg(debug_assertions)]
+	pub generation: usize,
 }
 
 impl<T> Deref for RcVec<T> {
@@ -46,6 +48,8 @@ impl<T: Clone> RcVec<T> {
 		Self {
 			count: source.len(),
 			source: Rc::new(UnsafeCell::new(source)),
+			#[cfg(debug_assertions)]
+			generation: 0,
 		}
 	}
 
@@ -65,6 +69,8 @@ impl<T: Clone> RcVec<T> {
 				RcVec {
 					count: self.count + 1,
 					source: Rc::clone(&self.source),
+					#[cfg(debug_assertions)]
+					generation: self.generation + 1,
 				}
 			}
 		}
