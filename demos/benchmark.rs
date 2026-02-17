@@ -10,9 +10,12 @@ const X: isize = -400;
 const Y: isize = -400;
 
 const COUNT: u32 = 30;
-const ITERATIONS: u32 = 1000;
+const ITERATIONS: u32 = 100000;
 
 fn main() {
+	// set seed for consistency between runs
+	simplerand::set_seed::<u8>(902375098175089174589u128);
+
 	// define region
 	let arena = BoundingBox::new(X, Y, WIDTH, HEIGHT);
 	let nodes = (0..COUNT)
@@ -31,5 +34,7 @@ fn main() {
 	let mut regions = Vec::with_capacity(ITERATIONS as usize);
 	let then = Instant::now();
 	regions.extend((0..ITERATIONS).map(|_| get_regions(&arena, &nodes)));
-	println!("get_regions took: {:?}", then.elapsed() / ITERATIONS);
+
+	let elapsed = then.elapsed();
+	println!("Total = {:?}, get_regions took: {:?}", elapsed, elapsed / ITERATIONS);
 }

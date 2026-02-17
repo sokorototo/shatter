@@ -85,7 +85,6 @@ impl BoundingBox {
 		// middle-right
 		if base.right > rhs.right {
 			regions[idx] = BoundingBox { left: rhs.right, ..base };
-			base.right = rhs.right;
 
 			idx += 1;
 		}
