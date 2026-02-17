@@ -13,6 +13,12 @@ categories = [
 version = "0.1.0"
 edition = "2021"
 
+[profile.bench]
+inherits = "release"
+debug = true
+lto = true
+codegen-units = 1
+
 [[example]]
 name = "partitioning"
 path = "demos/partitioning.rs"

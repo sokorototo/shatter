@@ -31,9 +31,12 @@ fn main() {
 		.collect::<Vec<_>>();
 
 	// benchmark
-	let mut regions = Vec::with_capacity(ITERATIONS as usize);
 	let then = Instant::now();
-	regions.extend((0..ITERATIONS).map(|_| get_regions(&arena, &nodes)));
+
+	for _ in 0..ITERATIONS {
+		let x = get_regions(&arena, &nodes);
+		std::hint::black_box(x);
+	}
 
 	let elapsed = then.elapsed();
 	println!("Total = {:?}, get_regions took: {:?}", elapsed, elapsed / ITERATIONS);
