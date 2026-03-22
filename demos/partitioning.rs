@@ -88,22 +88,26 @@ fn main() {
 		if window.is_key_released(Key::Right) {
 			rendered_regions = rendered_regions.saturating_add(1).min(nodes.len());
 			regions = get_regions(&base, &nodes[..rendered_regions]);
+
 			max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
 		}
 
 		if window.is_key_released(Key::Left) {
 			rendered_regions = rendered_regions.saturating_sub(1);
 			regions = get_regions(&base, &nodes[..rendered_regions]);
+
+			max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
 		}
 
 		if window.is_key_released(Key::R) {
 			nodes = generate_nodes();
 			regions = get_regions(&base, &nodes[..rendered_regions]);
+
 			max_influence = regions.iter().map(|(_, i)| i.len()).max().unwrap_or(0);
-			shown_influence = shown_influence.min(max_influence);
 		}
 
 		// clear screen
+		shown_influence = shown_influence.min(max_influence);
 		buffer.fill(0xFFF0F0F0);
 
 		// draw illustration
