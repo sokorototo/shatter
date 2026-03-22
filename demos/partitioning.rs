@@ -16,7 +16,7 @@ fn generate_nodes<const N: usize>() -> [Node; N] {
 	let mut nodes: [Node; N] = unsafe { mem::MaybeUninit::uninit().assume_init() };
 
 	for node in &mut nodes {
-		*node = match simplerand::rand::<u8>() % 2 == 0 {
+		*node = match simplerand::rand::<u8>() % 3 == 0 {
 			// generate a square node
 			true => {
 				let half_extent = Some(simplerand::rand_range::<isize>(25, 125));
