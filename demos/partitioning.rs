@@ -61,7 +61,7 @@ fn main() {
 
 	// Get arena
 	let base = BoundingBox::new(0, 0, WIDTH as _, HEIGHT as _);
-	let mut nodes = generate_nodes::<20>();
+	let mut nodes = generate_nodes::<50>();
 
 	// sort to reduce fragmentation
 	nodes.sort_by(|a, b| (b.half_extents.as_ref().map(|(x, y)| x * y).unwrap_or(0)).cmp(&a.half_extents.as_ref().map(|(x, y)| x * y).unwrap_or(0)));
