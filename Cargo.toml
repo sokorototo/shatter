@@ -2,7 +2,7 @@
 name = "shatter"
 license = "MIT"
 authors = ["Newton Toto <nyachiengatoto@gmail.com>"]
-description = "An algorithm for dividing a 2D space amond a labelled set of Axis-Aligned Bounding Boxes"
+description = "An algorithm for dividing a 2D space along a labelled set of Axis-Aligned Bounding Boxes"
 categories = [
 	"algorithms",
 	"geometry",
